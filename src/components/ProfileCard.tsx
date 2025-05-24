@@ -2,7 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, Heart } from "lucide-react";
 
 interface ProfileCardProps {
   user: {
@@ -22,7 +22,7 @@ interface ProfileCardProps {
 export const ProfileCard = ({ user }: ProfileCardProps) => {
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-      <div className="relative h-32 bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400">
+      <div className="relative h-32 bg-gradient-to-br from-blue-400 via-green-400 to-teal-400">
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
       
@@ -30,29 +30,33 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
         <div className="flex flex-col items-center text-center">
           <Avatar className="w-20 h-20 border-4 border-white shadow-lg mb-4">
             <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+            <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-blue-500 to-green-500 text-white">
               {user.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
           
           <h3 className="font-bold text-xl text-gray-900 mb-1">{user.name}</h3>
-          <p className="text-purple-600 font-medium mb-2">{user.title}</p>
+          <p className="text-blue-600 font-medium mb-2">{user.title}</p>
           
           <div className="flex items-center text-gray-500 text-sm mb-3">
             <MapPin className="w-4 h-4 mr-1" />
             {user.location}
           </div>
           
-          <div className="flex items-center mb-4">
+          <div className="flex items-center justify-center mb-4 space-x-4">
             <div className="flex items-center">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+              <Heart className="w-4 h-4 fill-red-400 text-red-400 mr-1" />
               <span className="font-medium">{user.rating}</span>
-              <span className="text-gray-500 text-sm ml-1">({user.reviewCount})</span>
+              <span className="text-gray-500 text-sm ml-1">({user.reviewCount} helped)</span>
             </div>
-            {user.price && (
-              <span className="ml-4 text-green-600 font-semibold">{user.price}</span>
-            )}
           </div>
+
+          {user.price && (
+            <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-3 mb-4 w-full">
+              <div className="text-sm text-gray-600 mb-1">Prefers:</div>
+              <div className="text-green-700 font-semibold">{user.price}</div>
+            </div>
+          )}
           
           <p className="text-gray-600 text-sm mb-4 line-clamp-3">{user.description}</p>
           
@@ -61,7 +65,7 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
               <Badge 
                 key={index} 
                 variant="secondary" 
-                className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 hover:from-purple-200 hover:to-pink-200 transition-colors"
+                className="bg-gradient-to-r from-blue-100 to-green-100 text-blue-700 hover:from-blue-200 hover:to-green-200 transition-colors"
               >
                 {skill}
               </Badge>

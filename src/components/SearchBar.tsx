@@ -34,29 +34,29 @@ export const SearchBar = ({ onSearch, popularSkills }: SearchBarProps) => {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
-            placeholder="Search for skills, services, or people..."
+            placeholder="What do you need help with? (cooking, guitar, coding, advice...)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-10 h-12 text-lg border-2 border-purple-200 focus:border-purple-400 rounded-full"
+            className="pl-10 h-12 text-lg border-2 border-blue-200 focus:border-blue-400 rounded-full"
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
         </div>
         <Button 
           onClick={handleSearch}
-          className="h-12 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-full font-semibold"
+          className="h-12 px-8 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 rounded-full font-semibold"
         >
-          Search
+          Find Help
         </Button>
       </div>
 
       {selectedFilters.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
-          <span className="text-sm text-gray-600 mr-2">Filters:</span>
+          <span className="text-sm text-gray-600 mr-2">Looking for:</span>
           {selectedFilters.map((filter) => (
             <Badge 
               key={filter} 
               variant="default" 
-              className="bg-purple-100 text-purple-700 hover:bg-purple-200 cursor-pointer"
+              className="bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer"
               onClick={() => removeFilter(filter)}
             >
               {filter}
@@ -67,7 +67,7 @@ export const SearchBar = ({ onSearch, popularSkills }: SearchBarProps) => {
       )}
 
       <div className="flex flex-wrap gap-2">
-        <span className="text-sm text-gray-600 mr-2">Popular:</span>
+        <span className="text-sm text-gray-600 mr-2">Popular needs:</span>
         {popularSkills.map((skill) => (
           <Badge 
             key={skill}
