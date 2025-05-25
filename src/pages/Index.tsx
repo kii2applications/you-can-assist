@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { DiscoveryFeed } from "@/components/DiscoveryFeed";
 import { popularSkills } from "@/data/sampleUsers";
 import { Button } from "@/components/ui/button";
-import { Users, Search, Heart, HandHeart, User, LogOut } from "lucide-react";
+import { Users, Search, Heart, HandHeart, User, LogOut, MessageSquare } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,7 +23,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchProfiles();
-  }, []);
+  }, [user]);
 
   const fetchProfiles = async () => {
     try {
@@ -33,7 +34,7 @@ const Index = () => {
 
       if (error) throw error;
 
-      // Transform profiles to match expected format
+      // Transform profiles to match expected format and filter out current user
       const transformedProfiles = data?.map(profile => ({
         id: profile.id,
         name: profile.name,
@@ -45,7 +46,7 @@ const Index = () => {
         reviewCount: profile.review_count || 0,
         description: profile.description || 'Happy to help!',
         price: profile.price_preference
-      })) || [];
+      })).filter(profile => !user || profile.id !== user.id) || [];
 
       setProfiles(transformedProfiles);
     } catch (error) {
@@ -76,6 +77,14 @@ const Index = () => {
                 <div>Loading...</div>
               ) : user ? (
                 <>
+                  <Button 
+                    variant="outline" 
+                    className="border-green-200 text-green-600 hover:bg-green-50"
+                    onClick={() => navigate("/requests")}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Requests
+                  </Button>
                   <Button 
                     variant="outline" 
                     className="border-blue-200 text-blue-600 hover:bg-blue-50"

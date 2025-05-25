@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, Star, Heart } from "lucide-react";
+import { ConnectionRequestDialog } from "./ConnectionRequestDialog";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProfileCardProps {
   user: {
@@ -20,6 +22,8 @@ interface ProfileCardProps {
 }
 
 export const ProfileCard = ({ user }: ProfileCardProps) => {
+  const { user: currentUser } = useAuth();
+  
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
       <div className="relative h-32 bg-gradient-to-br from-blue-400 via-green-400 to-teal-400">
@@ -60,7 +64,7 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
           
           <p className="text-gray-600 text-sm mb-4 line-clamp-3">{user.description}</p>
           
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
             {user.skills.slice(0, 4).map((skill, index) => (
               <Badge 
                 key={index} 
@@ -76,6 +80,16 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
               </Badge>
             )}
           </div>
+
+          {currentUser && currentUser.id !== user.id && (
+            <ConnectionRequestDialog
+              helper={{
+                id: user.id,
+                name: user.name,
+                skills: user.skills
+              }}
+            />
+          )}
         </div>
       </CardContent>
     </Card>
