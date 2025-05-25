@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,11 +18,11 @@ interface ConnectionRequest {
   requester_profile?: {
     name: string;
     avatar_url: string | null;
-  };
+  } | null;
   helper_profile?: {
     name: string;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
 export const ConnectionRequests = () => {
@@ -61,7 +62,10 @@ export const ConnectionRequests = () => {
           .order('created_at', { ascending: false });
         
         if (fallbackError) throw fallbackError;
-        setIncomingRequests(incomingFallback || []);
+        setIncomingRequests((incomingFallback || []).map(req => ({
+          ...req,
+          requester_profile: null
+        })));
       } else {
         setIncomingRequests(incoming || []);
       }
@@ -86,7 +90,10 @@ export const ConnectionRequests = () => {
           .order('created_at', { ascending: false });
         
         if (fallbackError) throw fallbackError;
-        setOutgoingRequests(outgoingFallback || []);
+        setOutgoingRequests((outgoingFallback || []).map(req => ({
+          ...req,
+          helper_profile: null
+        })));
       } else {
         setOutgoingRequests(outgoing || []);
       }
