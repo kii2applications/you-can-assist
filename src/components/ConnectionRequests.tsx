@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,7 +51,20 @@ export const ConnectionRequests = () => {
         .eq('helper_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (incomingError) throw incomingError;
+      if (incomingError) {
+        console.error('Error fetching incoming requests:', incomingError);
+        // Fallback: fetch without profile data
+        const { data: incomingFallback, error: fallbackError } = await supabase
+          .from('connection_requests')
+          .select('*')
+          .eq('helper_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (fallbackError) throw fallbackError;
+        setIncomingRequests(incomingFallback || []);
+      } else {
+        setIncomingRequests(incoming || []);
+      }
 
       // Fetch outgoing requests (where user is the requester)
       const { data: outgoing, error: outgoingError } = await supabase
@@ -64,10 +76,20 @@ export const ConnectionRequests = () => {
         .eq('requester_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (outgoingError) throw outgoingError;
-
-      setIncomingRequests(incoming || []);
-      setOutgoingRequests(outgoing || []);
+      if (outgoingError) {
+        console.error('Error fetching outgoing requests:', outgoingError);
+        // Fallback: fetch without profile data
+        const { data: outgoingFallback, error: fallbackError } = await supabase
+          .from('connection_requests')
+          .select('*')
+          .eq('requester_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (fallbackError) throw fallbackError;
+        setOutgoingRequests(outgoingFallback || []);
+      } else {
+        setOutgoingRequests(outgoing || []);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
