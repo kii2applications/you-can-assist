@@ -1,18 +1,60 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { DiscoveryFeed } from "@/components/DiscoveryFeed";
-import { sampleUsers, popularSkills } from "@/data/sampleUsers";
+import { popularSkills } from "@/data/sampleUsers";
 import { Button } from "@/components/ui/button";
-import { Users, Search, Heart, HandHeart } from "lucide-react";
+import { Users, Search, Heart, HandHeart, User, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, signOut, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<string[]>([]);
+  const [profiles, setProfiles] = useState([]);
 
   const handleSearch = (query: string, newFilters: string[]) => {
     setSearchQuery(query);
     setFilters(newFilters);
+  };
+
+  useEffect(() => {
+    fetchProfiles();
+  }, []);
+
+  const fetchProfiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Transform profiles to match expected format
+      const transformedProfiles = data?.map(profile => ({
+        id: profile.id,
+        name: profile.name,
+        avatar: profile.avatar_url || '',
+        location: profile.location || 'Location not set',
+        title: profile.title || 'Helper',
+        skills: profile.skills || [],
+        rating: Number(profile.rating) || 0,
+        reviewCount: profile.review_count || 0,
+        description: profile.description || 'Happy to help!',
+        price: profile.price_preference
+      })) || [];
+
+      setProfiles(transformedProfiles);
+    } catch (error) {
+      console.error('Error fetching profiles:', error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -30,12 +72,44 @@ const Index = () => {
               </h1>
             </div>
             <div className="flex space-x-3">
-              <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
-                Sign In
-              </Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
-                Join Community
-              </Button>
+              {loading ? (
+                <div>Loading...</div>
+              ) : user ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                    onClick={() => navigate("/profile")}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Join Community
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -78,6 +152,18 @@ const Index = () => {
               Most connections happen through friendship, skill trades, or simply paying it forward.
             </p>
           </div>
+
+          {!user && (
+            <div className="mb-8">
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-lg px-8 py-4"
+                onClick={() => navigate("/auth")}
+              >
+                Get Started - Join the Community
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Search Section */}
@@ -87,7 +173,7 @@ const Index = () => {
 
         {/* Discovery Feed */}
         <DiscoveryFeed 
-          users={sampleUsers} 
+          users={profiles} 
           searchQuery={searchQuery} 
           filters={filters} 
         />
