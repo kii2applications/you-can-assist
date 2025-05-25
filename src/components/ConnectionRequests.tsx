@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -67,7 +66,14 @@ export const ConnectionRequests = () => {
           requester_profile: null
         })));
       } else {
-        setIncomingRequests(incoming || []);
+        // Process the data to handle potential join errors
+        const processedIncoming = (incoming || []).map(req => ({
+          ...req,
+          requester_profile: req.requester_profile && typeof req.requester_profile === 'object' && 'name' in req.requester_profile 
+            ? req.requester_profile 
+            : null
+        }));
+        setIncomingRequests(processedIncoming);
       }
 
       // Fetch outgoing requests (where user is the requester)
@@ -95,7 +101,14 @@ export const ConnectionRequests = () => {
           helper_profile: null
         })));
       } else {
-        setOutgoingRequests(outgoing || []);
+        // Process the data to handle potential join errors
+        const processedOutgoing = (outgoing || []).map(req => ({
+          ...req,
+          helper_profile: req.helper_profile && typeof req.helper_profile === 'object' && 'name' in req.helper_profile 
+            ? req.helper_profile 
+            : null
+        }));
+        setOutgoingRequests(processedOutgoing);
       }
     } catch (error: any) {
       toast({
