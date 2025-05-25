@@ -69,7 +69,10 @@ export const ConnectionRequests = () => {
         // Process the data to handle potential join errors
         const processedIncoming = (incoming || []).map(req => ({
           ...req,
-          requester_profile: req.requester_profile && typeof req.requester_profile === 'object' && 'name' in req.requester_profile 
+          requester_profile: req.requester_profile && 
+            req.requester_profile !== null && 
+            typeof req.requester_profile === 'object' && 
+            'name' in req.requester_profile 
             ? req.requester_profile 
             : null
         }));
@@ -104,7 +107,10 @@ export const ConnectionRequests = () => {
         // Process the data to handle potential join errors
         const processedOutgoing = (outgoing || []).map(req => ({
           ...req,
-          helper_profile: req.helper_profile && typeof req.helper_profile === 'object' && 'name' in req.helper_profile 
+          helper_profile: req.helper_profile && 
+            req.helper_profile !== null && 
+            typeof req.helper_profile === 'object' && 
+            'name' in req.helper_profile 
             ? req.helper_profile 
             : null
         }));
