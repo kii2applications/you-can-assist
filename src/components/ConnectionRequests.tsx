@@ -1,35 +1,18 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, XCircle, Clock, User } from "lucide-react";
-
-interface ConnectionRequest {
-  id: string;
-  skill: string;
-  message: string | null;
-  status: string;
-  created_at: string;
-  requester_profile?: {
-    name: string;
-    avatar_url: string | null;
-  } | null;
-  helper_profile?: {
-    name: string;
-    avatar_url: string | null;
-  } | null;
-}
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { MessageSquare, Clock, CheckCircle, XCircle, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export const ConnectionRequests = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [incomingRequests, setIncomingRequests] = useState<ConnectionRequest[]>([]);
-  const [outgoingRequests, setOutgoingRequests] = useState<ConnectionRequest[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,126 +25,47 @@ export const ConnectionRequests = () => {
     if (!user) return;
 
     try {
-      // Fetch incoming requests (where user is the helper)
-      const { data: incoming, error: incomingError } = await supabase
+      const { data, error } = await supabase
         .from('connection_requests')
         .select(`
           *,
-          requester_profile:profiles!connection_requests_requester_id_fkey(name, avatar_url)
+          requester_profile:profiles!connection_requests_requester_id_fkey(*),
+          helper_profile:profiles!connection_requests_helper_id_fkey(*)
         `)
-        .eq('helper_id', user.id)
+        .or(`requester_id.eq.${user.id},helper_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (incomingError) {
-        console.error('Error fetching incoming requests:', incomingError);
-        // Fallback: fetch without profile data
-        const { data: incomingFallback, error: fallbackError } = await supabase
-          .from('connection_requests')
-          .select('*')
-          .eq('helper_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (fallbackError) throw fallbackError;
-        setIncomingRequests((incomingFallback || []).map(req => ({
-          ...req,
-          requester_profile: null
-        })));
-      } else {
-        // Process the data to handle potential join errors
-        const processedIncoming = (incoming || []).map(req => ({
-          ...req,
-          requester_profile: req.requester_profile && 
-            req.requester_profile !== null && 
-            typeof req.requester_profile === 'object' && 
-            'name' in req.requester_profile 
-            ? req.requester_profile 
-            : null
-        }));
-        setIncomingRequests(processedIncoming);
-      }
-
-      // Fetch outgoing requests (where user is the requester)
-      const { data: outgoing, error: outgoingError } = await supabase
-        .from('connection_requests')
-        .select(`
-          *,
-          helper_profile:profiles!connection_requests_helper_id_fkey(name, avatar_url)
-        `)
-        .eq('requester_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (outgoingError) {
-        console.error('Error fetching outgoing requests:', outgoingError);
-        // Fallback: fetch without profile data
-        const { data: outgoingFallback, error: fallbackError } = await supabase
-          .from('connection_requests')
-          .select('*')
-          .eq('requester_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (fallbackError) throw fallbackError;
-        setOutgoingRequests((outgoingFallback || []).map(req => ({
-          ...req,
-          helper_profile: null
-        })));
-      } else {
-        // Process the data to handle potential join errors
-        const processedOutgoing = (outgoing || []).map(req => ({
-          ...req,
-          helper_profile: req.helper_profile && 
-            req.helper_profile !== null && 
-            typeof req.helper_profile === 'object' && 
-            'name' in req.helper_profile 
-            ? req.helper_profile 
-            : null
-        }));
-        setOutgoingRequests(processedOutgoing);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      if (error) throw error;
+      setRequests(data || []);
+    } catch (error) {
+      console.error('Error fetching requests:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRequestAction = async (requestId: string, action: 'accepted' | 'declined') => {
+  const updateRequestStatus = async (requestId: string, status: 'accepted' | 'rejected') => {
     try {
       const { error } = await supabase
         .from('connection_requests')
-        .update({ status: action })
+        .update({ status })
         .eq('id', requestId);
 
       if (error) throw error;
 
       toast({
-        title: action === 'accepted' ? "Request Accepted" : "Request Declined",
-        description: `You have ${action} the help request.`
+        title: `Request ${status}`,
+        description: `The connection request has been ${status}.`,
       });
 
       fetchRequests();
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error updating request:', error);
       toast({
         title: "Error",
-        description: error.message,
-        variant: "destructive"
+        description: "Failed to update request status.",
+        variant: "destructive",
       });
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="text-yellow-600"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-      case 'accepted':
-        return <Badge variant="outline" className="text-green-600"><CheckCircle className="w-3 h-3 mr-1" />Accepted</Badge>;
-      case 'declined':
-        return <Badge variant="outline" className="text-red-600"><XCircle className="w-3 h-3 mr-1" />Declined</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -169,113 +73,98 @@ export const ConnectionRequests = () => {
     return <div className="text-center py-8">Loading requests...</div>;
   }
 
+  const incomingRequests = requests.filter(req => req.helper_id === user?.id && req.status === 'pending');
+  const outgoingRequests = requests.filter(req => req.requester_id === user?.id);
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <Tabs defaultValue="incoming" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="incoming">
-            Incoming Requests ({incomingRequests.filter(r => r.status === 'pending').length})
-          </TabsTrigger>
-          <TabsTrigger value="outgoing">
-            My Requests ({outgoingRequests.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="incoming" className="space-y-4">
-          {incomingRequests.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <User className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">No incoming requests yet.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            incomingRequests.map((request) => (
-              <Card key={request.id}>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-4 flex items-center">
+          <MessageSquare className="w-6 h-6 mr-2" />
+          Incoming Requests
+        </h2>
+        {incomingRequests.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400">No incoming requests</p>
+        ) : (
+          <div className="space-y-4">
+            {incomingRequests.map((req) => (
+              <Card key={req.id}>
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">
-                        Help request for: {request.skill}
-                      </CardTitle>
-                      <CardDescription>
-                        From {request.requester_profile?.name || 'Unknown user'}
-                      </CardDescription>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <User className="w-5 h-5 mr-2" />
+                      {req.requester_profile?.name || 'Unknown User'}
                     </div>
-                    {getStatusBadge(request.status)}
-                  </div>
+                    <Badge variant="outline">
+                      <Clock className="w-4 h-4 mr-1" />
+                      Pending
+                    </Badge>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {request.message && (
-                    <p className="text-gray-600 mb-4">"{request.message}"</p>
-                  )}
-                  <p className="text-sm text-gray-500 mb-4">
-                    Requested on {new Date(request.created_at).toLocaleDateString()}
-                  </p>
-                  {request.status === 'pending' && (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleRequestAction(request.id, 'accepted')}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Accept
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRequestAction(request.id, 'declined')}
-                        className="border-red-200 text-red-600 hover:bg-red-50"
-                      >
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Decline
-                      </Button>
-                    </div>
-                  )}
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">{req.message}</p>
+                  <div className="flex space-x-2">
+                    <Button 
+                      onClick={() => updateRequestStatus(req.id, 'accepted')}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Accept
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => updateRequestStatus(req.id, 'rejected')}
+                      className="border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Decline
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </TabsContent>
+            ))}
+          </div>
+        )}
+      </div>
 
-        <TabsContent value="outgoing" className="space-y-4">
-          {outgoingRequests.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <User className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">You haven't sent any requests yet.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            outgoingRequests.map((request) => (
-              <Card key={request.id}>
+      <Separator />
+
+      <div>
+        <h2 className="text-2xl font-bold mb-4 flex items-center">
+          <MessageSquare className="w-6 h-6 mr-2" />
+          Your Requests
+        </h2>
+        {outgoingRequests.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400">No outgoing requests</p>
+        ) : (
+          <div className="space-y-4">
+            {outgoingRequests.map((req) => (
+              <Card key={req.id}>
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">
-                        Request for: {request.skill}
-                      </CardTitle>
-                      <CardDescription>
-                        To {request.helper_profile?.name || 'Unknown user'}
-                      </CardDescription>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <User className="w-5 h-5 mr-2" />
+                      {req.helper_profile?.name || 'Unknown User'}
                     </div>
-                    {getStatusBadge(request.status)}
-                  </div>
+                    <Badge 
+                      variant={req.status === 'pending' ? 'outline' : 
+                               req.status === 'accepted' ? 'default' : 'destructive'}
+                    >
+                      {req.status === 'pending' && <Clock className="w-4 h-4 mr-1" />}
+                      {req.status === 'accepted' && <CheckCircle className="w-4 h-4 mr-1" />}
+                      {req.status === 'rejected' && <XCircle className="w-4 h-4 mr-1" />}
+                      {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                    </Badge>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {request.message && (
-                    <p className="text-gray-600 mb-4">Your message: "{request.message}"</p>
-                  )}
-                  <p className="text-sm text-gray-500">
-                    Sent on {new Date(request.created_at).toLocaleDateString()}
-                  </p>
+                  <p className="text-gray-600 dark:text-gray-300">{req.message}</p>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </TabsContent>
-      </Tabs>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

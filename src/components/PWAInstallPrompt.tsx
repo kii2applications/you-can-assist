@@ -50,11 +50,11 @@ export const PWAInstallPrompt = () => {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 bg-white border border-blue-200 rounded-lg shadow-lg p-4 z-50 max-w-sm mx-auto">
+    <div className="fixed bottom-4 left-4 right-4 bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-600 rounded-lg shadow-lg p-4 z-50 max-w-sm mx-auto">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1">Install Kii2Connect</h3>
-          <p className="text-sm text-gray-600 mb-3">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Install Kii2Connect</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
             Install our app for a better experience and quick access to community help!
           </p>
           <div className="flex space-x-2">

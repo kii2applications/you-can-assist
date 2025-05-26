@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { DiscoveryFeed } from "@/components/DiscoveryFeed";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { popularSkills } from "@/data/sampleUsers";
 import { Button } from "@/components/ui/button";
 import { Users, Search, Heart, User, LogOut, MessageSquare } from "lucide-react";
@@ -59,9 +61,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50">
+      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-blue-100 dark:border-gray-700 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -69,21 +71,23 @@ const Index = () => {
                 <img 
                   src="/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" 
                   alt="Kii2Connect Logo" 
-                  className="w-8 h-8 object-contain"
+                  className="w-8 h-8 object-contain mix-blend-multiply dark:mix-blend-screen"
+                  style={{ backgroundColor: 'transparent' }}
                 />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
                 Kii2Connect
               </h1>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex items-center space-x-3">
+              <ThemeToggle />
               {loading ? (
-                <div>Loading...</div>
+                <div className="text-gray-600 dark:text-gray-300">Loading...</div>
               ) : user ? (
                 <>
                   <Button 
                     variant="outline" 
-                    className="border-green-200 text-green-600 hover:bg-green-50"
+                    className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-600 dark:text-green-400 dark:hover:bg-green-950"
                     onClick={() => navigate("/requests")}
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
@@ -91,7 +95,7 @@ const Index = () => {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                    className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950"
                     onClick={() => navigate("/profile")}
                   >
                     <User className="w-4 h-4 mr-2" />
@@ -99,7 +103,7 @@ const Index = () => {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-950"
                     onClick={handleSignOut}
                   >
                     <LogOut className="w-4 h-4 mr-2" />
@@ -110,7 +114,7 @@ const Index = () => {
                 <>
                   <Button 
                     variant="outline" 
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                    className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950"
                     onClick={() => navigate("/auth")}
                   >
                     Sign In
@@ -131,35 +135,35 @@ const Index = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h2 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
             Find Someone Who Can
             <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent"> Help You</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
             Connect with people in your community who can teach, help, or share their skills. 
             From cooking lessons to career advice - everyone has something valuable to offer.
           </p>
           
           <div className="flex flex-wrap justify-center gap-6 mb-12">
-            <div className="flex items-center space-x-2 text-gray-600">
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
               <Search className="w-5 h-5 text-blue-500" />
               <span>Find the help you need</span>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
               <Users className="w-5 h-5 text-blue-500" />
               <span>Connect with helpers</span>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
               <Heart className="w-5 h-5 text-blue-500" />
               <span>Build meaningful connections</span>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-100 to-green-100 rounded-2xl p-8 mb-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+          <div className="bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-2xl p-8 mb-8 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               "A friend in need is a friend indeed"
             </h3>
-            <p className="text-gray-700 text-lg">
+            <p className="text-gray-700 dark:text-gray-300 text-lg">
               Whether you need someone to teach you guitar, help fix your computer, practice a language, 
               or just want advice on career decisions - there's someone in your community ready to help. 
               Most connections happen through friendship, skill trades, or simply paying it forward.
@@ -193,9 +197,9 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-blue-100 mt-16">
+      <footer className="bg-white dark:bg-gray-800 border-t border-blue-100 dark:border-gray-700 mt-16">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-gray-600">
+          <div className="text-center text-gray-600 dark:text-gray-300">
             <p>&copy; 2024 Kii2Connect. Building community through helping each other.</p>
           </div>
         </div>
