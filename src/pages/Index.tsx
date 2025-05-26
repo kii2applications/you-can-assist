@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { DiscoveryFeed } from "@/components/DiscoveryFeed";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { popularSkills } from "@/data/sampleUsers";
 import { Button } from "@/components/ui/button";
 import { Users, Search, Heart, User, LogOut, MessageSquare } from "lucide-react";
@@ -200,6 +200,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   );
 };
