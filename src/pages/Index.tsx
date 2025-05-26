@@ -5,7 +5,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { DiscoveryFeed } from "@/components/DiscoveryFeed";
 import { popularSkills } from "@/data/sampleUsers";
 import { Button } from "@/components/ui/button";
-import { Users, Search, Heart, HandHeart, User, LogOut, MessageSquare } from "lucide-react";
+import { Users, Search, Heart, User, LogOut, MessageSquare } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -65,11 +65,15 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <HandHeart className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 flex items-center justify-center">
+                <img 
+                  src="/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" 
+                  alt="Kii2Connect Logo" 
+                  className="w-8 h-8 object-contain"
+                />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                HelpConnect
+                Kii2Connect
               </h1>
             </div>
             <div className="flex space-x-3">
@@ -192,7 +196,7 @@ const Index = () => {
       <footer className="bg-white border-t border-blue-100 mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-gray-600">
-            <p>&copy; 2024 HelpConnect. Building community through helping each other.</p>
+            <p>&copy; 2024 Kii2Connect. Building community through helping each other.</p>
           </div>
         </div>
       </footer>
