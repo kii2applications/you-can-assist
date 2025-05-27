@@ -1,11 +1,16 @@
 name: Deploy to GitHub Pages
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions: # <--- ADD THIS BLOCK!
+      contents: write # Grants permission to write to the repository content
+      pages: write    # Grants permission to deploy to GitHub Pages
+      id-token: write # Recommended for OIDC, good practice to include
+
     steps:
       - uses: actions/checkout@v3
 
@@ -30,7 +35,7 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GH_PAT }}
+          github_token: ${{ secrets.GH_PAT }} # Using your Personal Access Token
           publish_dir: ./dist
           cname: kii2connect.com
           force_orphan: true
