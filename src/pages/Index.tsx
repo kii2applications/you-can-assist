@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -16,15 +17,20 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<string[]>([]);
   const [profiles, setProfiles] = useState([]);
+  const [showResults, setShowResults] = useState(false);
 
   const handleSearch = (query: string, newFilters: string[]) => {
     setSearchQuery(query);
     setFilters(newFilters);
+    // Show results when user searches or applies filters
+    setShowResults(query.trim() !== "" || newFilters.length > 0);
   };
 
   useEffect(() => {
-    fetchProfiles();
-  }, [user]);
+    if (showResults) {
+      fetchProfiles();
+    }
+  }, [user, showResults]);
 
   const fetchProfiles = async () => {
     try {
@@ -46,7 +52,8 @@ const Index = () => {
         rating: Number(profile.rating) || 0,
         reviewCount: profile.review_count || 0,
         description: profile.description || 'Happy to help!',
-        price: profile.price_preference
+        price: profile.price_preference,
+        socialLinks: profile.social_links || {}
       })).filter(profile => !user || profile.id !== user.id) || [];
 
       setProfiles(transformedProfiles);
@@ -186,12 +193,22 @@ const Index = () => {
           <SearchBar onSearch={handleSearch} popularSkills={popularSkills} />
         </div>
 
-        {/* Discovery Feed */}
-        <DiscoveryFeed 
-          users={profiles} 
-          searchQuery={searchQuery} 
-          filters={filters} 
-        />
+        {/* Show Discovery Feed only when searching */}
+        {showResults && (
+          <DiscoveryFeed 
+            users={profiles} 
+            searchQuery={searchQuery} 
+            filters={filters} 
+          />
+        )}
+
+        {!showResults && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">Search for help to get started</h3>
+            <p className="text-gray-500 dark:text-gray-500">Use the search bar above to find people who can help you with specific skills or interests</p>
+          </div>
+        )}
       </section>
 
       {/* Footer */}

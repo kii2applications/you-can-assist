@@ -54,6 +54,7 @@ export type Database = {
           rating: number | null
           review_count: number | null
           skills: string[] | null
+          social_links: Json | null
           title: string | null
           updated_at: string
         }
@@ -68,6 +69,7 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           skills?: string[] | null
+          social_links?: Json | null
           title?: string | null
           updated_at?: string
         }
@@ -82,6 +84,7 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           skills?: string[] | null
+          social_links?: Json | null
           title?: string | null
           updated_at?: string
         }
@@ -92,7 +95,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_helped_count: {
+        Args: { user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

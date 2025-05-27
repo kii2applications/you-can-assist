@@ -12,6 +12,7 @@ interface User {
   reviewCount: number;
   description: string;
   price?: string;
+  socialLinks?: Record<string, string>;
 }
 
 interface DiscoveryFeedProps {
@@ -37,10 +38,10 @@ export const DiscoveryFeed = ({ users, searchQuery, filters }: DiscoveryFeedProp
   return (
     <div className="w-full max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           {searchQuery || filters.length > 0 ? 'Search Results' : 'Discover People'}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           {filteredUsers.length} {filteredUsers.length === 1 ? 'person' : 'people'} found
         </p>
       </div>
@@ -53,9 +54,9 @@ export const DiscoveryFeed = ({ users, searchQuery, filters }: DiscoveryFeedProp
 
       {filteredUsers.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">No results found</h3>
-          <p className="text-gray-500">Try adjusting your search terms or filters</p>
+          <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">No results found</h3>
+          <p className="text-gray-500 dark:text-gray-500">Try adjusting your search terms or filters</p>
         </div>
       )}
     </div>

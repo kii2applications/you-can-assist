@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, X, Plus } from "lucide-react";
+import { Loader2, X, Plus, Youtube, Instagram, Linkedin, Github, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
@@ -20,7 +20,16 @@ interface Profile {
   description?: string;
   skills: string[];
   price_preference?: string;
+  social_links?: Record<string, string>;
 }
+
+const socialPlatforms = [
+  { key: 'youtube', label: 'YouTube', icon: Youtube },
+  { key: 'instagram', label: 'Instagram', icon: Instagram },
+  { key: 'linkedin', label: 'LinkedIn', icon: Linkedin },
+  { key: 'github', label: 'GitHub', icon: Github },
+  { key: 'twitter', label: 'Twitter', icon: Twitter },
+];
 
 export const ProfileForm = () => {
   const { user } = useAuth();
@@ -54,7 +63,8 @@ export const ProfileForm = () => {
         location: '',
         description: '',
         skills: [],
-        price_preference: ''
+        price_preference: '',
+        social_links: {}
       });
     } catch (error: any) {
       toast({
@@ -80,6 +90,7 @@ export const ProfileForm = () => {
           description: profile.description,
           skills: profile.skills,
           price_preference: profile.price_preference,
+          social_links: profile.social_links,
           updated_at: new Date().toISOString()
         });
 
@@ -115,6 +126,18 @@ export const ProfileForm = () => {
       setProfile({
         ...profile,
         skills: profile.skills.filter(skill => skill !== skillToRemove)
+      });
+    }
+  };
+
+  const updateSocialLink = (platform: string, url: string) => {
+    if (profile) {
+      setProfile({
+        ...profile,
+        social_links: {
+          ...profile.social_links,
+          [platform]: url
+        }
       });
     }
   };
@@ -211,6 +234,28 @@ export const ProfileForm = () => {
             onChange={(e) => setProfile({ ...profile, price_preference: e.target.value })}
             placeholder="e.g., Free, Coffee/meal, Skill trade, $20/hour"
           />
+        </div>
+
+        {/* Social Media Links Section */}
+        <div className="space-y-4">
+          <Label>Social Media Showcase</Label>
+          <div className="space-y-3">
+            {socialPlatforms.map(({ key, label, icon: Icon }) => (
+              <div key={key} className="flex items-center gap-3">
+                <Icon className="w-5 h-5 text-gray-500" />
+                <div className="flex-1">
+                  <Input
+                    placeholder={`Your ${label} profile URL`}
+                    value={profile.social_links?.[key] || ''}
+                    onChange={(e) => updateSocialLink(key, e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-gray-500">
+            Add your social media profiles to showcase your work and connect with others
+          </p>
         </div>
 
         <Button onClick={updateProfile} disabled={loading} className="w-full">
