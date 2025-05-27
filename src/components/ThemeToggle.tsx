@@ -35,6 +35,6 @@ export function ThemeToggle() {
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </ThemeProviderContext>
+    </DropdownMenu>
   );
 }
