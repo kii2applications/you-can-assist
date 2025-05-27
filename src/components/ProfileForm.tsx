@@ -56,16 +56,31 @@ export const ProfileForm = () => {
 
       if (error) throw error;
 
-      setProfile(data || {
-        id: user.id,
-        name: user.email?.split('@')[0] || 'New User',
-        title: '',
-        location: '',
-        description: '',
-        skills: [],
-        price_preference: '',
-        social_links: {}
-      });
+      if (data) {
+        // Convert the database data to our Profile interface
+        setProfile({
+          id: data.id,
+          name: data.name,
+          title: data.title || '',
+          location: data.location || '',
+          description: data.description || '',
+          skills: data.skills || [],
+          price_preference: data.price_preference || '',
+          social_links: (data.social_links as Record<string, string>) || {}
+        });
+      } else {
+        // Create default profile for new user
+        setProfile({
+          id: user.id,
+          name: user.email?.split('@')[0] || 'New User',
+          title: '',
+          location: '',
+          description: '',
+          skills: [],
+          price_preference: '',
+          social_links: {}
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
