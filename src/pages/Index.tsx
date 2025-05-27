@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -71,8 +70,7 @@ const Index = () => {
                 <img 
                   src="/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" 
                   alt="Kii2Connect Logo" 
-                  className="w-8 h-8 object-contain mix-blend-multiply dark:mix-blend-screen"
-                  style={{ backgroundColor: 'transparent' }}
+                  className="w-8 h-8 object-contain"
                 />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
