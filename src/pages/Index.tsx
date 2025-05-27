@@ -68,7 +68,7 @@ const Index = () => {
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 flex items-center justify-center">
                 <img 
-                  src="/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" 
+                  src="/lovable-uploads/d6feabf9-2ed6-480e-91b4-827b47d13167.png" 
                   alt="Kii2Connect Logo" 
                   className="w-8 h-8 object-contain"
                 />
