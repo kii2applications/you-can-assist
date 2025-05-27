@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Kii2Connect - Find Community Help & Share Your Skills</title>
     <meta name="description" content="Connect with people in your community who can help you learn new skills, solve problems, or provide assistance. From cooking lessons to career advice - find the help you need or share your expertise with others." />
     <meta name="keywords" content="community help, skill sharing, local assistance, tutoring, mentoring, neighborhood support, skill exchange, learning platform" />
@@ -30,15 +30,19 @@
     <meta name="twitter:description" content="Connect with people in your community who can help you learn new skills, solve problems, or provide assistance." />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
-    <!-- Additional SEO meta tags -->
-    <meta name="theme-color" content="#2563eb" />
+    <!-- PWA Theme and Mobile App Settings -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)" />
     <meta name="application-name" content="Kii2Connect" />
     
-    <!-- Apple PWA Meta Tags -->
+    <!-- Apple PWA Meta Tags for native-like appearance -->
     <meta name="apple-mobile-web-app-title" content="Kii2Connect" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-touch-fullscreen" content="yes" />
+    
+    <!-- Disable automatic phone number detection -->
+    <meta name="format-detection" content="telephone=no" />
     
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" />
@@ -68,6 +72,39 @@
     </script>
 
     <link rel="icon" href="/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" type="image/png">
+
+    <!-- PWA Styles for better mobile appearance -->
+    <style>
+      /* Ensure the app takes full screen space */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overscroll-behavior: none;
+      }
+      
+      /* Hide scrollbars on mobile for a cleaner look */
+      @media (max-width: 768px) {
+        ::-webkit-scrollbar {
+          display: none;
+        }
+        
+        body {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      }
+      
+      /* Ensure safe area for devices with notches */
+      @supports (padding: env(safe-area-inset-top)) {
+        body {
+          padding-top: env(safe-area-inset-top);
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      }
+    </style>
   </head>
 
   <body>
