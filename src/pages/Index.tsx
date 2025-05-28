@@ -7,9 +7,15 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { popularSkills } from "@/data/sampleUsers";
 import { Button } from "@/components/ui/button";
-import { Users, Search, Heart, User, LogOut, MessageSquare } from "lucide-react";
+import { Users, Search, Heart, User, LogOut, MessageSquare, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -68,10 +74,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-blue-100 dark:border-gray-700 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      {/* Mobile-friendly Header */}
+      <header className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-blue-100 dark:border-gray-700 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
+            {/* Logo */}
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 flex items-center justify-center">
                 <img 
@@ -80,57 +87,55 @@ const Index = () => {
                   className="w-8 h-8 object-contain"
                 />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
                 Kii2Connect
               </h1>
             </div>
-            <div className="flex items-center space-x-3">
+
+            {/* Right side - Theme + Menu */}
+            <div className="flex items-center space-x-2">
               <ThemeToggle />
+              
               {loading ? (
-                <div className="text-gray-600 dark:text-gray-300">Loading...</div>
+                <div className="text-gray-600 dark:text-gray-300 text-sm">Loading...</div>
               ) : user ? (
-                <>
-                  <Button 
-                    variant="outline" 
-                    className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-600 dark:text-green-400 dark:hover:bg-green-950"
-                    onClick={() => navigate("/requests")}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Requests
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950"
-                    onClick={() => navigate("/profile")}
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Profile
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-950"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
-                  </Button>
-                </>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate("/requests")}>
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Requests
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <User className="w-4 h-4 mr-2" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600 dark:text-red-400">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <>
-                  <Button 
-                    variant="outline" 
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950"
-                    onClick={() => navigate("/auth")}
-                  >
-                    Sign In
-                  </Button>
-                  <Button 
-                    className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
-                    onClick={() => navigate("/auth")}
-                  >
-                    Join Community
-                  </Button>
-                </>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate("/auth")}>
+                      Sign In
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/auth")}>
+                      Join Community
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>
