@@ -43,7 +43,25 @@ const ProfileView = () => {
         .maybeSingle();
 
       if (error) throw error;
-      setProfile(data);
+      
+      if (data) {
+        // Transform the data to match our Profile interface
+        const transformedProfile: Profile = {
+          id: data.id,
+          name: data.name,
+          avatar_url: data.avatar_url,
+          location: data.location,
+          title: data.title,
+          skills: data.skills || [],
+          rating: Number(data.rating) || 0,
+          review_count: data.review_count || 0,
+          description: data.description,
+          price_preference: data.price_preference,
+          social_links: (data.social_links as Record<string, string>) || {},
+          custom_links: (data.custom_links as Array<{title: string; url: string}>) || []
+        };
+        setProfile(transformedProfile);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
