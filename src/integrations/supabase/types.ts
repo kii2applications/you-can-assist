@@ -58,6 +58,7 @@ export type Database = {
           social_links: Json | null
           title: string | null
           updated_at: string
+          userid: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -74,6 +75,7 @@ export type Database = {
           social_links?: Json | null
           title?: string | null
           updated_at?: string
+          userid?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -90,6 +92,7 @@ export type Database = {
           social_links?: Json | null
           title?: string | null
           updated_at?: string
+          userid?: string | null
         }
         Relationships: []
       }

@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 
 interface Profile {
   id: string;
+  userid?: string;
   name: string;
   avatar_url?: string;
   location?: string;
@@ -23,24 +24,30 @@ interface Profile {
 }
 
 const ProfileView = () => {
-  const { userId } = useParams();
+  const { userId, userid } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (userId) {
+    if (userId || userid) {
       fetchProfile();
     }
-  }, [userId]);
+  }, [userId, userid]);
 
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+      let query = supabase.from('profiles').select('*');
+      
+      if (userid) {
+        // Handle @username route
+        query = query.eq('userid', userid);
+      } else if (userId) {
+        // Handle /profile/uuid route
+        query = query.eq('id', userId);
+      }
+      
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
       
@@ -48,6 +55,7 @@ const ProfileView = () => {
         // Transform the data to match our Profile interface
         const transformedProfile: Profile = {
           id: data.id,
+          userid: data.userid,
           name: data.name,
           avatar_url: data.avatar_url,
           location: data.location,
@@ -71,7 +79,7 @@ const ProfileView = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center safe-area-inset-top">
         <div className="text-center">Loading profile...</div>
       </div>
     );
@@ -79,7 +87,7 @@ const ProfileView = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center safe-area-inset-top">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Profile not found</h1>
           <Button onClick={() => navigate("/")} variant="outline">
@@ -106,7 +114,9 @@ const ProfileView = () => {
     customLinks: profile.custom_links || []
   };
 
-  const profileUrl = `${window.location.origin}/profile/${profile.id}`;
+  const profileUrl = profile.userid 
+    ? `${window.location.origin}/@${profile.userid}`
+    : `${window.location.origin}/profile/${profile.id}`;
 
   return (
     <>
@@ -152,9 +162,12 @@ const ProfileView = () => {
         </script>
         
         <link rel="canonical" href={profileUrl} />
+        
+        {/* PWA Safe Area */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
       </Helmet>
       
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen safe-area-inset-top pb-20">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <Button 
