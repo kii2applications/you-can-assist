@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -28,7 +27,6 @@ const Index = () => {
   const handleSearch = (query: string, newFilters: string[]) => {
     setSearchQuery(query);
     setFilters(newFilters);
-    // Show results when user searches or applies filters
     setShowResults(query.trim() !== "" || newFilters.length > 0);
   };
 
@@ -47,7 +45,6 @@ const Index = () => {
 
       if (error) throw error;
 
-      // Transform profiles to match expected format and filter out current user
       const transformedProfiles = data?.map(profile => ({
         id: profile.id,
         name: profile.name,
@@ -59,7 +56,8 @@ const Index = () => {
         reviewCount: profile.review_count || 0,
         description: profile.description || 'Happy to help!',
         price: profile.price_preference,
-        socialLinks: profile.social_links || {}
+        socialLinks: profile.social_links || {},
+        customLinks: profile.custom_links || []
       })).filter(profile => !user || profile.id !== user.id) || [];
 
       setProfiles(transformedProfiles);

@@ -13,6 +13,7 @@ interface User {
   description: string;
   price?: string;
   socialLinks?: Record<string, string>;
+  customLinks?: Array<{title: string; url: string}>;
 }
 
 interface DiscoveryFeedProps {

@@ -30,6 +30,32 @@
     <meta name="twitter:description" content="Connect with people in your community who can help you learn new skills, solve problems, or provide assistance." />
     <meta name="twitter:image" content="https://kii2connect.com/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" />
 
+    <!-- Schema.org structured data for better SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Kii2Connect",
+      "description": "Connect with people in your community who can help you learn new skills, solve problems, or provide assistance.",
+      "url": "https://kii2connect.com/",
+      "applicationCategory": "SocialNetworkingApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Kii2Connect",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://kii2connect.com/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png"
+        }
+      }
+    }
+    </script>
+
     <!-- PWA Theme and Mobile App Settings -->
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)" />
@@ -52,30 +78,11 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Structured data for search engines -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Kii2Connect",
-      "description": "Connect with people in your community who can help you learn new skills, solve problems, or provide assistance.",
-      "url": "https://kii2connect.com/",
-      "applicationCategory": "SocialNetworkingApplication",
-      "operatingSystem": "Any",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
-    }
-    </script>
 
     <link rel="icon" href="/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png" type="image/png">
 
     <!-- PWA Styles for better mobile appearance -->
     <style>
-      /* Ensure the app takes full screen space */
       html, body {
         height: 100%;
         margin: 0;
@@ -83,7 +90,6 @@
         overscroll-behavior: none;
       }
       
-      /* Hide scrollbars on mobile for a cleaner look */
       @media (max-width: 768px) {
         ::-webkit-scrollbar {
           display: none;
@@ -95,7 +101,6 @@
         }
       }
       
-      /* Ensure safe area for devices with notches */
       @supports (padding: env(safe-area-inset-top)) {
         body {
           padding-top: env(safe-area-inset-top);

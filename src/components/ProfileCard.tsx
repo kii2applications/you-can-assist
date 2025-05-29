@@ -2,9 +2,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Star, Heart, Youtube, Instagram, Linkedin, Github, Twitter, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Star, Heart, Youtube, Instagram, Linkedin, Github, Twitter, ExternalLink, MessageCircle, Share2 } from "lucide-react";
 import { ConnectionRequestDialog } from "./ConnectionRequestDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileCardProps {
   user: {
@@ -19,6 +21,7 @@ interface ProfileCardProps {
     description: string;
     price?: string;
     socialLinks?: Record<string, string>;
+    customLinks?: Array<{title: string; url: string}>;
   };
 }
 
@@ -34,6 +37,8 @@ const getSocialIcon = (platform: string) => {
       return <Github className="w-4 h-4" />;
     case 'twitter':
       return <Twitter className="w-4 h-4" />;
+    case 'whatsapp':
+      return <MessageCircle className="w-4 h-4" />;
     default:
       return <ExternalLink className="w-4 h-4" />;
   }
@@ -41,11 +46,58 @@ const getSocialIcon = (platform: string) => {
 
 export const ProfileCard = ({ user }: ProfileCardProps) => {
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
+  
+  const shareProfile = async () => {
+    const profileUrl = `${window.location.origin}/profile/${user.id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${user.name}'s Profile on Kii2Connect`,
+          text: `Check out ${user.name}'s profile and skills on Kii2Connect`,
+          url: profileUrl,
+        });
+      } catch (error) {
+        await navigator.clipboard.writeText(profileUrl);
+        toast({
+          title: "Profile link copied!",
+          description: "Share this link with others."
+        });
+      }
+    } else {
+      await navigator.clipboard.writeText(profileUrl);
+      toast({
+        title: "Profile link copied!",
+        description: "Share this link with others."
+      });
+    }
+  };
+
+  const formatWhatsAppLink = (number: string) => {
+    const cleanNumber = number.replace(/\D/g, '');
+    return `https://wa.me/${cleanNumber}`;
+  };
+
+  const formatSocialLink = (platform: string, url: string) => {
+    if (platform === 'whatsapp') {
+      return formatWhatsAppLink(url);
+    }
+    return url.startsWith('http') ? url : `https://${url}`;
+  };
   
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <div className="relative h-32 bg-gradient-to-br from-blue-400 via-green-400 to-teal-400">
         <div className="absolute inset-0 bg-black/20"></div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm hover:bg-white/30"
+          onClick={shareProfile}
+        >
+          <Share2 className="w-4 h-4 text-white" />
+        </Button>
       </div>
       
       <CardContent className="p-6 -mt-16 relative">
@@ -108,7 +160,7 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
                   url && (
                     <a
                       key={platform}
-                      href={url}
+                      href={formatSocialLink(platform, url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xs"
@@ -117,6 +169,27 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
                       <span className="capitalize">{platform}</span>
                     </a>
                   )
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Links */}
+          {user.customLinks && user.customLinks.length > 0 && (
+            <div className="mb-4 w-full">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Additional Links:</h4>
+              <div className="flex justify-center gap-2 flex-wrap">
+                {user.customLinks.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.url.startsWith('http') ? link.url : `https://${link.url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 text-purple-700 dark:text-purple-300 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/50 dark:hover:to-pink-800/50 transition-colors text-xs"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>{link.title}</span>
+                  </a>
                 ))}
               </div>
             </div>

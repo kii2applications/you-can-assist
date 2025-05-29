@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, X, Plus, Youtube, Instagram, Linkedin, Github, Twitter } from "lucide-react";
+import { Loader2, X, Plus, Youtube, Instagram, Linkedin, Github, Twitter, MessageCircle, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
@@ -21,6 +21,7 @@ interface Profile {
   skills: string[];
   price_preference?: string;
   social_links?: Record<string, string>;
+  custom_links?: Array<{title: string; url: string}>;
 }
 
 const socialPlatforms = [
@@ -29,6 +30,7 @@ const socialPlatforms = [
   { key: 'linkedin', label: 'LinkedIn', icon: Linkedin },
   { key: 'github', label: 'GitHub', icon: Github },
   { key: 'twitter', label: 'Twitter', icon: Twitter },
+  { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
 ];
 
 export const ProfileForm = () => {
@@ -37,6 +39,7 @@ export const ProfileForm = () => {
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [newSkill, setNewSkill] = useState("");
+  const [newCustomLink, setNewCustomLink] = useState({ title: "", url: "" });
 
   useEffect(() => {
     if (user) {
@@ -57,7 +60,6 @@ export const ProfileForm = () => {
       if (error) throw error;
 
       if (data) {
-        // Convert the database data to our Profile interface
         setProfile({
           id: data.id,
           name: data.name,
@@ -66,10 +68,10 @@ export const ProfileForm = () => {
           description: data.description || '',
           skills: data.skills || [],
           price_preference: data.price_preference || '',
-          social_links: (data.social_links as Record<string, string>) || {}
+          social_links: (data.social_links as Record<string, string>) || {},
+          custom_links: (data.custom_links as Array<{title: string; url: string}>) || []
         });
       } else {
-        // Create default profile for new user
         setProfile({
           id: user.id,
           name: user.email?.split('@')[0] || 'New User',
@@ -78,7 +80,8 @@ export const ProfileForm = () => {
           description: '',
           skills: [],
           price_preference: '',
-          social_links: {}
+          social_links: {},
+          custom_links: []
         });
       }
     } catch (error: any) {
@@ -106,6 +109,7 @@ export const ProfileForm = () => {
           skills: profile.skills,
           price_preference: profile.price_preference,
           social_links: profile.social_links,
+          custom_links: profile.custom_links,
           updated_at: new Date().toISOString()
         });
 
@@ -157,6 +161,52 @@ export const ProfileForm = () => {
     }
   };
 
+  const addCustomLink = () => {
+    if (newCustomLink.title.trim() && newCustomLink.url.trim() && profile) {
+      setProfile({
+        ...profile,
+        custom_links: [...(profile.custom_links || []), { ...newCustomLink }]
+      });
+      setNewCustomLink({ title: "", url: "" });
+    }
+  };
+
+  const removeCustomLink = (index: number) => {
+    if (profile) {
+      setProfile({
+        ...profile,
+        custom_links: profile.custom_links?.filter((_, i) => i !== index) || []
+      });
+    }
+  };
+
+  const shareProfile = async () => {
+    const profileUrl = `${window.location.origin}/profile/${user?.id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${profile?.name}'s Profile on Kii2Connect`,
+          text: `Check out ${profile?.name}'s profile and skills on Kii2Connect`,
+          url: profileUrl,
+        });
+      } catch (error) {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(profileUrl);
+        toast({
+          title: "Profile link copied!",
+          description: "Share this link with others to show your profile."
+        });
+      }
+    } else {
+      await navigator.clipboard.writeText(profileUrl);
+      toast({
+        title: "Profile link copied!",
+        description: "Share this link with others to show your profile."
+      });
+    }
+  };
+
   if (!profile) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -168,7 +218,13 @@ export const ProfileForm = () => {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Complete Your Profile</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle>Complete Your Profile</CardTitle>
+          <Button onClick={shareProfile} variant="outline" size="sm">
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Share Profile
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -251,16 +307,15 @@ export const ProfileForm = () => {
           />
         </div>
 
-        {/* Social Media Links Section */}
         <div className="space-y-4">
-          <Label>Social Media Showcase</Label>
+          <Label>Social Media & Contact</Label>
           <div className="space-y-3">
             {socialPlatforms.map(({ key, label, icon: Icon }) => (
               <div key={key} className="flex items-center gap-3">
                 <Icon className="w-5 h-5 text-gray-500" />
                 <div className="flex-1">
                   <Input
-                    placeholder={`Your ${label} profile URL`}
+                    placeholder={key === 'whatsapp' ? 'Your WhatsApp number (with country code)' : `Your ${label} profile URL`}
                     value={profile.social_links?.[key] || ''}
                     onChange={(e) => updateSocialLink(key, e.target.value)}
                   />
@@ -268,8 +323,44 @@ export const ProfileForm = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="space-y-4">
+          <Label>Custom Links</Label>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Link title (e.g., My Portfolio)"
+              value={newCustomLink.title}
+              onChange={(e) => setNewCustomLink({ ...newCustomLink, title: e.target.value })}
+            />
+            <Input
+              placeholder="URL"
+              value={newCustomLink.url}
+              onChange={(e) => setNewCustomLink({ ...newCustomLink, url: e.target.value })}
+            />
+            <Button type="button" onClick={addCustomLink} variant="outline" size="icon">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {profile.custom_links?.map((link, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                <div>
+                  <span className="font-medium">{link.title}</span>
+                  <span className="text-gray-500 ml-2 text-sm">{link.url}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeCustomLink(index)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
           <p className="text-sm text-gray-500">
-            Add your social media profiles to showcase your work and connect with others
+            Add custom links to showcase your work, portfolio, or other relevant pages
           </p>
         </div>
 
