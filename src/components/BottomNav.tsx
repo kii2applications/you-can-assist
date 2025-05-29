@@ -16,6 +16,7 @@ export const BottomNav = () => {
     { icon: User, label: "Profile", path: "/profile" }
   ];
 
+  // Only show bottom nav if user is logged in
   if (!user) return null;
 
   return (

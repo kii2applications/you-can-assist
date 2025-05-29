@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { ConnectionRequests } from "@/components/ConnectionRequests";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 const Requests = () => {
   const navigate = useNavigate();
@@ -29,19 +27,11 @@ const Requests = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen safe-area-inset-top pb-20">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/")}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Connection Requests</h1>
-          <p className="text-gray-600">Manage your help requests and offers</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Connection Requests</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage your help requests and offers</p>
         </div>
         
         <ConnectionRequests />
