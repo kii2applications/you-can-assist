@@ -115,8 +115,8 @@ const ProfileView = () => {
   };
 
   const profileUrl = profile.userid 
-    ? `${window.location.origin}/@${profile.userid}`
-    : `${window.location.origin}/profile/${profile.id}`;
+    ? `${window.location.origin}/@${profile.id}`
+    : `${window.location.origin}/connect/${profile.userid}`;
 
   return (
     <>
