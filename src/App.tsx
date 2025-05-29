@@ -32,8 +32,8 @@ const App = () => (
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/profile" element={<Profile />} />
-                  <Route path="/profile/:userId" element={<ProfileView />} />
-                  <Route path="/@:userid" element={<ProfileView />} />
+                  <Route path="/connect/:userid" element={<ProfileView />} />
+                  <Route path="/@:userId" element={<ProfileView />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/requests" element={<Requests />} />
                   <Route path="*" element={<NotFound />} />
