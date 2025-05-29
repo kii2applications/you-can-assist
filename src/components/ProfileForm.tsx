@@ -221,8 +221,8 @@ export const ProfileForm = () => {
 
   const shareProfile = async () => {
     const profileUrl = profile?.userid 
-      ? `${window.location.origin}/@${profile.userid}`
-      : `${window.location.origin}/profile/${user?.id}`;
+      ? `${window.location.origin}/@${user.id}`
+      : `${window.location.origin}/connect/${profile?.userid}`;
     
     if (navigator.share) {
       try {
