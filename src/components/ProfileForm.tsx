@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, X, Plus, Youtube, Instagram, Linkedin, Github, Twitter, MessageCircle, ExternalLink, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ProfilePictureUpload } from "./ProfilePictureUpload";
 
 interface Profile {
   id: string;
@@ -22,6 +23,7 @@ interface Profile {
   price_preference?: string;
   social_links?: Record<string, string>;
   custom_links?: Array<{title: string; url: string}>;
+  avatar_url?: string;
 }
 
 const socialPlatforms = [
@@ -73,20 +75,26 @@ export const ProfileForm = () => {
           skills: data.skills || [],
           price_preference: data.price_preference || '',
           social_links: (data.social_links as Record<string, string>) || {},
-          custom_links: (data.custom_links as Array<{title: string; url: string}>) || []
+          custom_links: (data.custom_links as Array<{title: string; url: string}>) || [],
+          avatar_url: data.avatar_url || ''
         });
       } else {
+        // For new users, check if they have Google profile data
+        const googleAvatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+        const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'New User';
+        
         setProfile({
           id: user.id,
           userid: '',
-          name: user.email?.split('@')[0] || 'New User',
+          name: displayName,
           title: '',
           location: '',
           description: '',
           skills: [],
           price_preference: '',
           social_links: {},
-          custom_links: []
+          custom_links: [],
+          avatar_url: googleAvatarUrl || ''
         });
       }
     } catch (error: any) {
@@ -149,6 +157,7 @@ export const ProfileForm = () => {
           price_preference: profile.price_preference,
           social_links: profile.social_links,
           custom_links: profile.custom_links,
+          avatar_url: profile.avatar_url,
           updated_at: new Date().toISOString()
         });
 
@@ -166,6 +175,15 @@ export const ProfileForm = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAvatarUpdate = (newAvatarUrl: string | null) => {
+    if (profile) {
+      setProfile({
+        ...profile,
+        avatar_url: newAvatarUrl || ''
+      });
     }
   };
 
@@ -221,8 +239,8 @@ export const ProfileForm = () => {
 
   const shareProfile = async () => {
     const profileUrl = profile?.userid 
-      ? `${window.location.origin}/@${user.id}`
-      : `${window.location.origin}/connect/${profile?.userid}`;
+      ? `${window.location.origin}/connect/${profile.userid}`
+      : `${window.location.origin}/@${user.id}`;
     
     if (navigator.share) {
       try {
@@ -272,6 +290,17 @@ export const ProfileForm = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Profile Picture Section */}
+          <div className="flex flex-col items-center space-y-4">
+            <Label>Profile Picture</Label>
+            <ProfilePictureUpload 
+              currentAvatarUrl={profile.avatar_url}
+              onAvatarUpdate={handleAvatarUpdate}
+              userName={profile.name}
+            />
+          </div>
+
+          {/* Username Section */}
           <div className="space-y-2">
             <Label htmlFor="userid">Username (for sharing)</Label>
             <div className="flex gap-2">
@@ -300,12 +329,13 @@ export const ProfileForm = () => {
                   <p className="text-red-600">✗ Username already taken</p>
                 )}
                 <p className="text-gray-500">
-                  Your profile will be: {window.location.origin}/@{profile.userid}
+                  Your profile will be: {window.location.origin}/connect/{profile.userid}
                 </p>
               </div>
             )}
           </div>
 
+          {/* Rest of form fields remain the same */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name *</Label>

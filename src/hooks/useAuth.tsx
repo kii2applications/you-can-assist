@@ -20,11 +20,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth event:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Handle new user profile creation for Google auth
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(async () => {
+            await handleUserProfile(session.user);
+          }, 0);
+        }
       }
     );
 
@@ -37,6 +44,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleUserProfile = async (user: User) => {
+    try {
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      // Only create profile if it doesn't exist
+      if (!existingProfile) {
+        const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+        const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'New User';
+
+        await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            name: displayName,
+            avatar_url: avatarUrl || null,
+            skills: [],
+            social_links: {},
+            custom_links: []
+          });
+      }
+    } catch (error) {
+      console.error('Error handling user profile:', error);
+    }
+  };
 
   const signOut = async () => {
     await supabase.auth.signOut();

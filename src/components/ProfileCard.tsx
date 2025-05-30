@@ -103,7 +103,7 @@ export const ProfileCard = ({ user }: ProfileCardProps) => {
       <CardContent className="p-6 -mt-16 relative">
         <div className="flex flex-col items-center text-center">
           <Avatar className="w-20 h-20 border-4 border-white dark:border-gray-800 shadow-lg mb-4">
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={user.avatar || ''} alt={user.name} />
             <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-blue-500 to-green-500 text-white">
               {user.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
