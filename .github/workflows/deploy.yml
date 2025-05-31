@@ -16,7 +16,19 @@ jobs:
       - run: npm install
 
       - name: Build
-        run: npm run build
+        run: |
+          echo "Checking environment variables..."
+          if [ -n "$VITE_GOOGLE_CLIENT_ID" ]; then
+            echo "VITE_GOOGLE_CLIENT_ID is set"
+          else
+            echo "VITE_GOOGLE_CLIENT_ID is NOT set"
+          fi
+          if [ -n "$VITE_GEMINI_API_KEY" ]; then
+            echo "VITE_GEMINI_API_KEY is set"
+          else
+            echo "VITE_GEMINI_API_KEY is NOT set"
+          fi
+          npm run build
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}

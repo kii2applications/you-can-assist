@@ -85,44 +85,66 @@ export const AuthForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     script.defer = true;
 
     script.onload = () => {
-      if (window.google?.accounts?.id) {
-        // Debug environment variable
-        console.log('Google Client ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID);
+      // Debug environment variable and Google client availability
+      console.log('Environment check:', {
+        hasGoogleClient: !!window.google?.accounts?.id,
+        clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'not set',
+        isDevelopment: import.meta.env.DEV,
+        mode: import.meta.env.MODE
+      });
 
-        // Initialize Google One Tap
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          callback: handleSignInWithGoogle,
-          auto_select: false, // Changed to false to ensure user interaction
-          use_fedcm_for_prompt: true
-        });
-
-        // Render the button
-        const buttonDiv = document.getElementById('googleButton');
-        if (buttonDiv) {
-          window.google.accounts.id.renderButton(buttonDiv, {
-            type: 'standard',
-            theme: 'outline',
-            size: 'large',
-            text: 'signin_with',
-            shape: 'rectangular',
-            width: '100%',
-          });
-        }
-
-        // Also show the One Tap prompt with notification callback
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed()) {
-            console.log("One Tap not displayed:", notification.getNotDisplayedReason());
-          }
-          if (notification.isSkippedMoment()) {
-            console.log("One Tap skipped:", notification.getSkippedReason());
-          }
-          if (notification.isDismissedMoment()) {
-            console.log("One Tap dismissed:", notification.getDismissedReason());
-          }
-        });
+      if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+        console.error('Google Client ID is not set in environment variables');
+        return;
       }
+
+      if (window.google?.accounts?.id) {
+        try {
+          // Initialize Google One Tap
+          window.google.accounts.id.initialize({
+            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+            callback: handleSignInWithGoogle,
+            auto_select: false,
+            use_fedcm_for_prompt: true
+          });
+
+          // Render the button
+          const buttonDiv = document.getElementById('googleButton');
+          if (buttonDiv) {
+            window.google.accounts.id.renderButton(buttonDiv, {
+              type: 'standard',
+              theme: 'outline',
+              size: 'large',
+              text: 'signin_with',
+              shape: 'rectangular',
+              width: '100%',
+            });
+          } else {
+            console.error('Google button container not found');
+          }
+
+          // Also show the One Tap prompt with notification callback
+          window.google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed()) {
+              console.log("One Tap not displayed:", notification.getNotDisplayedReason());
+            }
+            if (notification.isSkippedMoment()) {
+              console.log("One Tap skipped:", notification.getSkippedReason());
+            }
+            if (notification.isDismissedMoment()) {
+              console.log("One Tap dismissed:", notification.getDismissedReason());
+            }
+          });
+        } catch (error) {
+          console.error('Error initializing Google Sign-In:', error);
+        }
+      } else {
+        console.error('Google Identity API not loaded properly');
+      }
+    };
+
+    script.onerror = (error) => {
+      console.error('Error loading Google Identity script:', error);
     };
 
     document.body.appendChild(script);
