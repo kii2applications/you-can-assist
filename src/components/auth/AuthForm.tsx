@@ -199,48 +199,52 @@ export const AuthForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Welcome to Kii2Connect</CardTitle>
-        <CardDescription>Sign in to your account or create a new one</CardDescription>
+    <Card className="w-full max-w-md mx-auto backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700 shadow-xl">
+      <CardHeader className="space-y-1 px-4 md:px-6 py-4 md:py-6">
+        <CardTitle className="text-xl md:text-2xl text-center">Welcome Back</CardTitle>
+        <CardDescription className="text-center text-sm md:text-base">
+          Join your community of helpers and learners
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 md:px-6 py-2 md:py-4">
         {/* Google Sign In Button Container */}
-        <div id="googleButton" className="w-full mb-4"></div>
+        <div id="googleButton" className="w-full mb-4 md:mb-6"></div>
 
-        <div className="relative mb-4">
+        <div className="relative mb-4 md:mb-6">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+            <span className="w-full border-t dark:border-gray-700" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground">
+              Or continue with email
+            </span>
           </div>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="signin" className="text-sm md:text-base">Sign In</TabsTrigger>
+            <TabsTrigger value="signup" className="text-sm md:text-base">Sign Up</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="signin">
+          <TabsContent value="signin" className="mt-0 space-y-4">
             <SignInForm onSubmit={(email, password) => handleAuth(email, password, false)} loading={loading} />
           </TabsContent>
 
-          <TabsContent value="signup">
+          <TabsContent value="signup" className="mt-0 space-y-4">
             <SignUpForm onSubmit={(email, password, name) => handleAuth(email, password, true, name)} loading={loading} />
           </TabsContent>
         </Tabs>
 
         {error && (
           <Alert className="mt-4" variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="text-sm">{error}</AlertDescription>
           </Alert>
         )}
 
         {message && (
           <Alert className="mt-4">
-            <AlertDescription>{message}</AlertDescription>
+            <AlertDescription className="text-sm">{message}</AlertDescription>
           </Alert>
         )}
       </CardContent>
@@ -258,9 +262,9 @@ const SignInForm = ({ onSubmit, loading }: { onSubmit: (email: string, password:
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="signin-email">Email</Label>
+    <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+      <div className="space-y-1.5 md:space-y-2">
+        <Label htmlFor="signin-email" className="text-sm md:text-base">Email</Label>
         <Input
           id="signin-email"
           type="email"
@@ -268,19 +272,21 @@ const SignInForm = ({ onSubmit, loading }: { onSubmit: (email: string, password:
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="bg-white/50 dark:bg-gray-800/50 h-9 md:h-10 text-sm md:text-base"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="signin-password">Password</Label>
+      <div className="space-y-1.5 md:space-y-2">
+        <Label htmlFor="signin-password" className="text-sm md:text-base">Password</Label>
         <Input
           id="signin-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="bg-white/50 dark:bg-gray-800/50 h-9 md:h-10 text-sm md:text-base"
         />
       </div>
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 h-9 md:h-10 text-sm md:text-base" disabled={loading}>
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Sign In
       </Button>
@@ -299,9 +305,9 @@ const SignUpForm = ({ onSubmit, loading }: { onSubmit: (email: string, password:
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="signup-name">Full Name</Label>
+    <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+      <div className="space-y-1.5 md:space-y-2">
+        <Label htmlFor="signup-name" className="text-sm md:text-base">Full Name</Label>
         <Input
           id="signup-name"
           type="text"
@@ -309,10 +315,11 @@ const SignUpForm = ({ onSubmit, loading }: { onSubmit: (email: string, password:
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
+          className="bg-white/50 dark:bg-gray-800/50 h-9 md:h-10 text-sm md:text-base"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="signup-email">Email</Label>
+      <div className="space-y-1.5 md:space-y-2">
+        <Label htmlFor="signup-email" className="text-sm md:text-base">Email</Label>
         <Input
           id="signup-email"
           type="email"
@@ -320,10 +327,11 @@ const SignUpForm = ({ onSubmit, loading }: { onSubmit: (email: string, password:
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="bg-white/50 dark:bg-gray-800/50 h-9 md:h-10 text-sm md:text-base"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="signup-password">Password</Label>
+      <div className="space-y-1.5 md:space-y-2">
+        <Label htmlFor="signup-password" className="text-sm md:text-base">Password</Label>
         <Input
           id="signup-password"
           type="password"
@@ -332,9 +340,10 @@ const SignUpForm = ({ onSubmit, loading }: { onSubmit: (email: string, password:
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
+          className="bg-white/50 dark:bg-gray-800/50 h-9 md:h-10 text-sm md:text-base"
         />
       </div>
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 h-9 md:h-10 text-sm md:text-base" disabled={loading}>
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Create Account
       </Button>

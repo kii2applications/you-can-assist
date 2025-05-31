@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -20,55 +19,16 @@ import {
 const Index = () => {
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<string[]>([]);
-  const [profiles, setProfiles] = useState([]);
-  const [showResults, setShowResults] = useState(false);
+  const [showAI, setShowAI] = useState(true);
 
-  const handleSearch = (query: string, newFilters: string[]) => {
-    setSearchQuery(query);
-    setFilters(newFilters);
-    setShowResults(query.trim() !== "" || newFilters.length > 0);
-  };
-
-  useEffect(() => {
-    if (showResults) {
-      fetchProfiles();
-    }
-  }, [user, showResults]);
-
-  const fetchProfiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const transformedProfiles = data?.map(profile => ({
-        id: profile.id,
-        name: profile.name,
-        avatar: profile.avatar_url || '',
-        location: profile.location || 'Location not set',
-        title: profile.title || 'Helper',
-        skills: profile.skills || [],
-        rating: Number(profile.rating) || 0,
-        reviewCount: profile.review_count || 0,
-        description: profile.description || 'Happy to help!',
-        price: profile.price_preference,
-        socialLinks: profile.social_links || {},
-        customLinks: profile.custom_links || []
-      })).filter(profile => !user || profile.id !== user.id) || [];
-
-      setProfiles(transformedProfiles);
-    } catch (error) {
-      console.error('Error fetching profiles:', error);
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleAIToggle = (enabled: boolean) => {
+    setShowAI(enabled);
   };
 
   return (
@@ -80,9 +40,9 @@ const Index = () => {
             {/* Logo */}
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 flex items-center justify-center">
-                <img 
-                  src="/lovable-uploads/d6feabf9-2ed6-480e-91b4-827b47d13167.png" 
-                  alt="Kii2Connect Logo" 
+                <img
+                  src="/lovable-uploads/d6feabf9-2ed6-480e-91b4-827b47d13167.png"
+                  alt="Kii2Connect Logo"
                   className="w-8 h-8 object-contain"
                 />
               </div>
@@ -94,7 +54,7 @@ const Index = () => {
             {/* Right side - Theme + Menu */}
             <div className="flex items-center space-x-2">
               <ThemeToggle />
-              
+
               {loading ? (
                 <div className="text-gray-600 dark:text-gray-300 text-sm">Loading...</div>
               ) : user ? (
@@ -113,7 +73,7 @@ const Index = () => {
                       <User className="w-4 h-4 mr-2" />
                       Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600 dark:text-red-400">
+                    <DropdownMenuItem onClick={() => signOut()} className="text-red-600 dark:text-red-400">
                       <LogOut className="w-4 h-4 mr-2" />
                       Sign Out
                     </DropdownMenuItem>
@@ -149,10 +109,10 @@ const Index = () => {
             <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent"> Help You</span>
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-            Connect with people in your community who can teach, help, or share their skills. 
+            Connect with people in your community who can teach, help, or share their skills.
             From cooking lessons to career advice - everyone has something valuable to offer.
           </p>
-          
+
           <div className="flex flex-wrap justify-center gap-6 mb-12">
             <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
               <Search className="w-5 h-5 text-blue-500" />
@@ -173,15 +133,15 @@ const Index = () => {
               "A friend in need is a friend indeed"
             </h3>
             <p className="text-gray-700 dark:text-gray-300 text-lg">
-              Whether you need someone to teach you guitar, help fix your computer, practice a language, 
-              or just want advice on career decisions - there's someone in your community ready to help. 
+              Whether you need someone to teach you guitar, help fix your computer, practice a language,
+              or just want advice on career decisions - there's someone in your community ready to help.
               Most connections happen through friendship, skill trades, or simply paying it forward.
             </p>
           </div>
 
           {!user && (
             <div className="mb-8">
-              <Button 
+              <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-lg px-8 py-4"
                 onClick={() => navigate("/auth")}
@@ -194,25 +154,25 @@ const Index = () => {
 
         {/* Search Section */}
         <div className="mb-12">
-          <SearchBar onSearch={handleSearch} popularSkills={popularSkills} />
+          <SearchBar
+            onSearch={handleSearch}
+            onFilterChange={() => { }}
+            popularSkills={popularSkills}
+            showAI={showAI}
+            onAIToggle={handleAIToggle}
+            initialQuery=""
+          />
         </div>
 
-        {/* Show Discovery Feed only when searching */}
-        {showResults && (
-          <DiscoveryFeed 
-            users={profiles} 
-            searchQuery={searchQuery} 
-            filters={filters} 
-          />
-        )}
-
-        {!showResults && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">Search for help to get started</h3>
-            <p className="text-gray-500 dark:text-gray-500">Use the search bar above to find people who can help you with specific skills or interests</p>
-          </div>
-        )}
+        <div className="text-center py-12">
+          <div className="text-gray-400 text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+            Search for help to get started
+          </h3>
+          <p className="text-gray-500 dark:text-gray-500">
+            Use the search bar above to find people who can help you with specific skills or interests
+          </p>
+        </div>
       </section>
 
       {/* Footer */}

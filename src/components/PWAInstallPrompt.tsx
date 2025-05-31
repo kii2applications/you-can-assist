@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, X } from 'lucide-react';
@@ -31,11 +30,11 @@ export const PWAInstallPrompt = () => {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
       console.log('User accepted the install prompt');
     }
-    
+
     setDeferredPrompt(null);
     setShowPrompt(false);
   };
@@ -50,7 +49,7 @@ export const PWAInstallPrompt = () => {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-600 rounded-lg shadow-lg p-4 z-50 max-w-sm mx-auto">
+    <div className="fixed bottom-[4.5rem] left-4 right-4 bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-600 rounded-lg shadow-lg p-4 z-40 max-w-sm mx-auto safe-area-inset-bottom">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Install Kii2Connect</h3>
@@ -58,15 +57,15 @@ export const PWAInstallPrompt = () => {
             Install our app for a better experience and quick access to community help!
           </p>
           <div className="flex space-x-2">
-            <Button 
+            <Button
               onClick={handleInstall}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
             >
               <Download className="w-4 h-4 mr-2" />
               Install
             </Button>
-            <Button 
+            <Button
               onClick={handleDismiss}
               variant="outline"
               size="sm"
@@ -79,7 +78,7 @@ export const PWAInstallPrompt = () => {
           onClick={handleDismiss}
           variant="ghost"
           size="sm"
-          className="p-1 h-auto"
+          className="p-1 h-auto text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <X className="w-4 h-4" />
         </Button>
