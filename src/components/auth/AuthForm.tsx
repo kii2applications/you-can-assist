@@ -86,6 +86,9 @@ export const AuthForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
     script.onload = () => {
       if (window.google?.accounts?.id) {
+        // Debug environment variable
+        console.log('Google Client ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
         // Initialize Google One Tap
         window.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
