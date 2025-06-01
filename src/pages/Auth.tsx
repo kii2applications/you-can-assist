@@ -63,7 +63,7 @@ const Auth = () => {
             </div>
 
             {/* Quote card - hidden on mobile until form is in view */}
-            <div className="w-full bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-xl md:rounded-2xl p-4 md:p-8">
+            <div className="text-center w-full bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-xl md:rounded-2xl p-4 md:p-8">
               <h3 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2 md:mb-4">
                 "A friend in need is a friend indeed"
               </h3>
