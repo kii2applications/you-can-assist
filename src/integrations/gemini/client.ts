@@ -1,7 +1,14 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini client
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+
+// Debug log for development
+if (!GEMINI_API_KEY) {
+    console.error('VITE_GEMINI_API_KEY is not set in environment variables');
+}
+
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 interface SelfHelpSuggestion {
@@ -62,26 +69,27 @@ const extractJSON = (text: string): any => {
 };
 
 // Get expert recommendations based on search query
-export const getExpertRecommendations = async (query: string): Promise<ExpertRecommendations | null> => {
+export const getExpertRecommendations = async (searchTerm: string, location?: string): Promise<ExpertRecommendations | null> => {
     try {
-        const prompt = `Task: Find people who can help with: "${query}"
+        const locationContext = location ? ` in ${location}` : '';
+        const prompt = `Task: Find people who can help with: "${searchTerm}"${locationContext}
 
 Instructions:
-1. Find up to 10 people in ${query}
+1. Find at least 10 people who are experts in ${searchTerm}${locationContext}
 2. Include only verifiable experts with actual online presence
-3. Include peopple with different specialties and approaches to ${query}
+3. Include people with different specialties and approaches to ${searchTerm}
 4. For each expert, find their most relevant and helpful content
 5. Try to include their profile picture URL if publicly available
 6. Ensure all URLs and information are real and accessible
-7. Include people from various platforms (YouTube, LinkedIn, X (Twitter), personal websites, etc.)
+7. Include people from various platforms (YouTube, LinkedIn, X (Twitter), Instagram, Snapchat, Tiktok, personal websites, etc.)
 
 Return the data in this exact JSON format:
 {
-    "query": "${query}",
+    "query": "${searchTerm}",
     "experts": [
         {
             "name": "Person Name",
-            "expertise": "Their specific expertise in ${query}",
+            "expertise": "Their specific expertise in ${searchTerm}",
             "platform": "Platform where they can be found",
             "profileUrl": "Their main profile URL",
             "profilePicture": "URL to their profile picture (if available)",
@@ -90,29 +98,7 @@ Return the data in this exact JSON format:
                     "type": "video/article/course/social",
                     "title": "Actual content title",
                     "url": "Direct URL to the content",
-                    "description": "How this content helps with ${query}"
-                }
-            ]
-        }
-    ]
-}
-
-Example response structure (but find real people for ${query}):
-{
-    "query": "cooking",
-    "experts": [
-        {
-            "name": "Gordon Ramsay",
-            "expertise": "Professional Chef, Culinary Expert",
-            "platform": "YouTube",
-            "profileUrl": "https://www.youtube.com/@gordonramsay",
-            "profilePicture": "https://example.com/gordon.jpg",
-            "content": [
-                {
-                    "type": "video",
-                    "title": "Ultimate Cooking Tips",
-                    "url": "https://www.youtube.com/watch?v=...",
-                    "description": "Professional cooking techniques and tips for home cooks"
+                    "description": "How this content helps with ${searchTerm}"
                 }
             ]
         }
@@ -216,5 +202,45 @@ Return ONLY a JSON object in this exact format (no other text):
     } catch (error) {
         console.error('Error getting enhanced search terms:', error);
         return null;
+    }
+};
+
+export const getSearchTermExpansion = async (searchTerm: string): Promise<string[]> => {
+    try {
+        const prompt = `Given the search term "${searchTerm}", provide a list of closely related terms, skills, and variations that would be relevant in a professional/skills context. Focus on terms that would appear in someone's profile, skills, or job description. Return only an array of terms, no explanations.
+
+Example input: "cook"
+Example output: ["cook", "chef", "cooking", "culinary", "food preparation", "kitchen", "baking", "food service"]
+
+Input: "${searchTerm}"
+Output:`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const responseText = response.text();
+        let terms: string[] = [];
+
+        try {
+            // Try to parse as JSON array first
+            terms = JSON.parse(responseText);
+        } catch {
+            // If not valid JSON, split by commas and clean up
+            terms = responseText
+                .replace(/[\[\]"']/g, '')
+                .split(',')
+                .map(term => term.trim().toLowerCase())
+                .filter(term => term.length > 0);
+        }
+
+        // Add the original search term if not present
+        if (!terms.includes(searchTerm.toLowerCase())) {
+            terms.unshift(searchTerm.toLowerCase());
+        }
+
+        return terms;
+    } catch (error) {
+        console.error('Error getting search term expansion:', error);
+        // Return original term if AI expansion fails
+        return [searchTerm.toLowerCase()];
     }
 }; 

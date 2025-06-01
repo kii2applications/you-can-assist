@@ -6,7 +6,7 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { popularSkills } from "@/data/sampleUsers";
 import { Button } from "@/components/ui/button";
-import { Users, Search, Heart, User, LogOut, MessageSquare, Menu } from "lucide-react";
+import { Users, Search, Heart, User, LogOut, MessageSquare, Menu, Sparkles, MapPin } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -19,12 +19,13 @@ import {
 const Index = () => {
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
-  const [showAI, setShowAI] = useState(true);
+  const [showAI, setShowAI] = useState(false);
 
-  const handleSearch = (query: string) => {
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-    }
+  const handleSearch = (query: string, location: string) => {
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query);
+    if (location.trim()) params.set("location", location);
+    navigate(`/search?${params.toString()}`);
   };
 
   const handleAIToggle = (enabled: boolean) => {
@@ -102,7 +103,7 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="max-w-5xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
             Find Someone Who Can
@@ -112,23 +113,29 @@ const Index = () => {
             Connect with people in your community who can teach, help, or share their skills.
             From cooking lessons to career advice - everyone has something valuable to offer.
           </p>
+        </div>
 
-          <div className="flex flex-wrap justify-center gap-6 mb-12">
-            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
-              <Search className="w-5 h-5 text-blue-500" />
-              <span>Find the help you need</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
-              <Users className="w-5 h-5 text-blue-500" />
-              <span>Connect with helpers</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
-              <Heart className="w-5 h-5 text-blue-500" />
-              <span>Build meaningful connections</span>
-            </div>
+        {/* Centered Search Section */}
+        <div className="mb-16">
+          <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg">
+            <h3 className="text-2xl font-semibold text-center mb-6">
+              What kind of help are you looking for?
+            </h3>
+            <SearchBar
+              onSearch={handleSearch}
+              onFilterChange={() => { }}
+              popularSkills={popularSkills}
+              showAI={showAI}
+              onAIToggle={handleAIToggle}
+              initialQuery=""
+              initialLocation=""
+            />
           </div>
+        </div>
 
-          <div className="bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-2xl p-8 mb-8 max-w-4xl mx-auto">
+        {/* Quote Card */}
+        <div className="mb-16">
+          <div className="bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-2xl p-6 md:p-8">
             <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               "A friend in need is a friend indeed"
             </h3>
@@ -138,46 +145,53 @@ const Index = () => {
               Most connections happen through friendship, skill trades, or simply paying it forward.
             </p>
           </div>
+        </div>
 
-          {!user && (
-            <div className="mb-8">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-lg px-8 py-4"
-                onClick={() => navigate("/auth")}
-              >
-                Get Started - Join the Community
-              </Button>
+        {/* CTA Section */}
+        {!user && (
+          <div className="text-center mb-16">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-lg px-8 py-4"
+              onClick={() => navigate("/auth")}
+            >
+              Get Started - Join the Community
+            </Button>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
+              Sign up to unlock AI-powered expert recommendations and more features
+            </p>
+          </div>
+        )}
+
+        {/* How it Works Section */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-16">
+          <div className="text-center mb-16">
+            <h3 className="text-3xl font-bold mb-2">How it works</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">Three simple steps to get started</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                <Search className="w-8 h-8 text-blue-500 mb-4 mx-auto" />
+                <h3 className="text-lg font-semibold mb-2">Smart Search</h3>
+                <p className="text-gray-600 dark:text-gray-300">Find exactly what you need with our intelligent search system</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                <MapPin className="w-8 h-8 text-blue-500 mb-4 mx-auto" />
+                <h3 className="text-lg font-semibold mb-2">Local Community</h3>
+                <p className="text-gray-600 dark:text-gray-300">Connect with helpers in your area for in-person assistance</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                <Sparkles className="w-8 h-8 text-blue-500 mb-4 mx-auto" />
+                <h3 className="text-lg font-semibold mb-2">AI-Powered</h3>
+                <p className="text-gray-600 dark:text-gray-300">Get personalized expert recommendations with AI assistance</p>
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Search Section */}
-        <div className="mb-12">
-          <SearchBar
-            onSearch={handleSearch}
-            onFilterChange={() => { }}
-            popularSkills={popularSkills}
-            showAI={showAI}
-            onAIToggle={handleAIToggle}
-            initialQuery=""
-          />
-        </div>
-
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
-            Search for help to get started
-          </h3>
-          <p className="text-gray-500 dark:text-gray-500">
-            Use the search bar above to find people who can help you with specific skills or interests
-          </p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-blue-100 dark:border-gray-700 mt-16">
-        <div className="container mx-auto px-4 py-8">
+      <footer className="bg-white dark:bg-gray-800 border-t border-blue-100 dark:border-gray-700">
+        <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="text-center text-gray-600 dark:text-gray-300">
             <p>&copy; 2024 Kii2Connect. Building community through helping each other.</p>
           </div>

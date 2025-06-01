@@ -1,96 +1,127 @@
-import { useState, useEffect } from "react";
+import { useState, FormEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, X, Sparkles } from "lucide-react";
+import { Search as SearchIcon, X, MapPin, Lock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
-export interface SearchBarProps {
-  onSearch: (query: string) => void;
+interface SearchBarProps {
+  onSearch: (query: string, location: string) => void;
   onFilterChange?: (filters: string[]) => void;
   popularSkills?: string[];
-  showAI: boolean;
-  onAIToggle: (enabled: boolean) => void;
+  showAI?: boolean;
+  onAIToggle?: (enabled: boolean) => void;
   initialQuery?: string;
+  initialLocation?: string;
 }
 
 export const SearchBar = ({
   onSearch,
   onFilterChange = () => { },
   popularSkills = [],
-  showAI = true,
+  showAI = false,
   onAIToggle,
-  initialQuery = ""
+  initialQuery = "",
+  initialLocation = ""
 }: SearchBarProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [query, setQuery] = useState(initialQuery);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [location, setLocation] = useState(initialLocation);
+  const [filters, setFilters] = useState<string[]>([]);
 
-  useEffect(() => {
-    setQuery(initialQuery);
-  }, [initialQuery]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    onSearch(query);
-    if (selectedFilters.length > 0) {
-      onFilterChange(selectedFilters);
-    }
+    onSearch(query, location);
   };
 
-  const addFilter = (skill: string) => {
-    if (!selectedFilters.includes(skill)) {
-      const newFilters = [...selectedFilters, skill];
-      setSelectedFilters(newFilters);
+  const handleAIToggle = (enabled: boolean) => {
+    if (!user && enabled) {
+      navigate("/auth");
+      return;
+    }
+    onAIToggle?.(enabled);
+  };
+
+  const addFilter = (filter: string) => {
+    if (!filters.includes(filter)) {
+      const newFilters = [...filters, filter];
+      setFilters(newFilters);
       onFilterChange(newFilters);
     }
   };
 
-  const removeFilter = (skill: string) => {
-    const newFilters = selectedFilters.filter(f => f !== skill);
-    setSelectedFilters(newFilters);
+  const removeFilter = (filter: string) => {
+    const newFilters = filters.filter(f => f !== filter);
+    setFilters(newFilters);
     onFilterChange(newFilters);
   };
 
+  const handlePopularSkillClick = (skill: string) => {
+    setQuery(skill);
+    onSearch(skill, location);
+  };
+
   return (
-    <div className="w-full space-y-4">
-      <form onSubmit={handleSubmit} className="w-full space-y-2">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search by skills, location, or expertise..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button type="submit">
-            Search
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Switch
-            id="ai-mode"
-            checked={showAI}
-            onCheckedChange={onAIToggle}
-            defaultChecked={true}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1 relative">
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search skills, interests, or help needed..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-10"
           />
-          <label
-            htmlFor="ai-mode"
-            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-yellow-500" />
-            AI Recommendations
-          </label>
         </div>
-      </form>
 
-      {selectedFilters.length > 0 && (
+        <div className="relative w-full md:w-64">
+          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Location (optional)"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        <Button type="submit" className="w-full md:w-auto">
+          Search
+        </Button>
+
+        {onAIToggle && (
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="ai-mode"
+              checked={showAI}
+              onCheckedChange={handleAIToggle}
+            />
+            <div className="flex items-center gap-2">
+              <Label htmlFor="ai-mode">AI Suggestions</Label>
+              {!user && (
+                <Lock className="w-4 h-4 text-gray-500" aria-label="Login required for AI search" />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {!user && showAI && (
+        <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 p-2 rounded">
+          Please <Button variant="link" className="px-1 py-0 h-auto" onClick={() => navigate("/auth")}>sign in</Button>
+          to use AI-powered expert search and get personalized recommendations.
+        </div>
+      )}
+
+      {filters.length > 0 && (
         <div className="flex flex-wrap gap-2">
           <span className="text-sm text-gray-600 dark:text-gray-400">Filters:</span>
-          {selectedFilters.map((filter) => (
+          {filters.map((filter) => (
             <Badge
               key={filter}
               variant="secondary"
@@ -111,15 +142,15 @@ export const SearchBar = ({
             <Badge
               key={skill}
               variant="outline"
-              className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              onClick={() => addFilter(skill)}
+              className="cursor-pointer hover:bg-secondary"
+              onClick={() => handlePopularSkillClick(skill)}
             >
               {skill}
             </Badge>
           ))}
         </div>
       )}
-    </div>
+    </form>
   );
 };
 
