@@ -134,7 +134,7 @@ const Index = () => {
         </div>
 
         {/* Quote Card */}
-        <div className="mb-16">
+        <div className="text-center mb-16">
           <div className="bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30 rounded-2xl p-6 md:p-8">
             <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               "A friend in need is a friend indeed"
