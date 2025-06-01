@@ -46,6 +46,13 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const getAvatarUrl = (user: User) => {
+    if (user.avatar && user.avatar.startsWith('http')) {
+      return user.avatar;
+    }
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
+  };
+
   const handleProfileClick = (user: User) => {
     if (user.isAIRecommended) {
       window.open(user.profileUrl || '#', '_blank');
@@ -128,13 +135,6 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
   }
 
   const renderUserCard = (user: User) => {
-    const getAvatarUrl = (user: User) => {
-      if (user.avatar && user.avatar.startsWith('http')) {
-        return user.avatar;
-      }
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
-    };
-
     return (
       <Card className="p-4 relative hover:shadow-lg transition-shadow duration-200">
         <div className="flex items-start gap-4">
@@ -180,9 +180,9 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
                   <Badge
                     key={index}
                     variant="outline"
-                    className="text-xs whitespace-nowrap"
+                    className="text-xs whitespace-nowrap max-w-full"
                   >
-                    {skill}
+                    <span className="truncate block max-w-[200px]">{skill}</span>
                   </Badge>
                 ))}
                 {user.skills.length > 3 && (
@@ -197,19 +197,19 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
               </p>
 
               {user.isAIRecommended ? (
-                <div className="mt-2 space-y-2">
+                <div className="mt-2 space-y-2 w-full">
                   {user.customLinks && user.customLinks.length > 0 && (
-                    <div className="space-y-1">
+                    <div className="space-y-1 w-full">
                       {user.customLinks.slice(0, 2).map((link, index) => (
                         <a
                           key={index}
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
+                          className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 w-full"
                         >
                           <ExternalLink className="w-3 h-3 shrink-0" />
-                          <span className="truncate flex-1">{link.title}</span>
+                          <span className="truncate min-w-0">{link.title}</span>
                         </a>
                       ))}
                       {user.customLinks.length > 2 && (
@@ -220,9 +220,9 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
                     </div>
                   )}
                   {user.platform && (
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <Globe className="w-3 h-3" />
-                      <span className="truncate">{user.platform}</span>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 w-full">
+                      <Globe className="w-3 h-3 shrink-0" />
+                      <span className="truncate min-w-0">{user.platform}</span>
                     </div>
                   )}
                 </div>
@@ -290,10 +290,139 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
       </div>
 
       {/* User cards */}
-      <div className="grid gap-4">
+      <div className="grid grid-cols-1 gap-4 w-full">
         {filteredUsers.map((user) => (
-          <div key={user.id}>
-            {renderUserCard(user)}
+          <div key={user.id} className="w-full">
+            <Card className="p-4 relative hover:shadow-lg transition-shadow duration-200 w-full">
+              <div className="flex items-start gap-4 w-full">
+                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                  <img
+                    src={getAvatarUrl(user)}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
+                    }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0 w-full">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                        {user.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        {user.title}
+                      </p>
+                    </div>
+                    <div className="shrink-0">
+                      {user.isAIRecommended ? (
+                        <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/50 whitespace-nowrap">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          AI Result
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/50 whitespace-nowrap">
+                          <Users className="w-3 h-3 mr-1" />
+                          Registered
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-2">
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {user.skills.slice(0, 3).map((skill, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-xs whitespace-nowrap max-w-full"
+                        >
+                          <span className="truncate block max-w-[200px]">{skill}</span>
+                        </Badge>
+                      ))}
+                      {user.skills.length > 3 && (
+                        <span className="text-xs text-gray-500">
+                          +{user.skills.length - 3} more
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2 break-words">
+                      {user.description}
+                    </p>
+
+                    {user.isAIRecommended ? (
+                      <div className="mt-2 space-y-2 w-full">
+                        {user.customLinks && user.customLinks.length > 0 && (
+                          <div className="space-y-1 w-full">
+                            {user.customLinks.slice(0, 2).map((link, index) => (
+                              <a
+                                key={index}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 w-full"
+                              >
+                                <ExternalLink className="w-3 h-3 shrink-0" />
+                                <span className="truncate min-w-0">{link.title}</span>
+                              </a>
+                            ))}
+                            {user.customLinks.length > 2 && (
+                              <p className="text-xs text-gray-500">
+                                +{user.customLinks.length - 2} more resources
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {user.platform && (
+                          <div className="flex items-center gap-1 text-xs text-gray-500 w-full">
+                            <Globe className="w-3 h-3 shrink-0" />
+                            <span className="truncate min-w-0">{user.platform}</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center shrink-0">
+                            {[...Array(5)].map((_, i) => (
+                              <span
+                                key={i}
+                                className={`text-sm ${i < Math.floor(user.rating)
+                                  ? 'text-yellow-400'
+                                  : 'text-gray-300'
+                                  }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                            ({user.reviewCount})
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                          {user.price}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                        onClick={() => handleProfileClick(user)}
+                      >
+                        {user.isAIRecommended ? 'View Profile →' : 'Connect'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         ))}
       </div>
