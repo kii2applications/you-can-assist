@@ -1,0 +1,33 @@
+
+{
+  "name": "Kii2Connect - Community Help Platform",
+  "short_name": "Kii2Connect",
+  "description": "Connect with people in your community who can help you learn new skills, solve problems, or provide assistance.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/lovable-uploads/090ce9d9-42be-47cc-9f82-9287adf4e57b.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["social", "productivity", "lifestyle"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "apple-touch-fullscreen": "yes",
+  "apple-mobile-web-app-capable": "yes",
+  "apple-mobile-web-app-status-bar-style": "default"
+}
