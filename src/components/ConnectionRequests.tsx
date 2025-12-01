@@ -29,8 +29,8 @@ export const ConnectionRequests = () => {
         .from('connection_requests')
         .select(`
           *,
-          requester_profile:profiles!connection_requests_requester_id_fkey(*),
-          helper_profile:profiles!connection_requests_helper_id_fkey(*)
+          requester_profile:profiles!requester_id(*),
+          helper_profile:profiles!helper_id(*)
         `)
         .or(`requester_id.eq.${user.id},helper_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
@@ -104,14 +104,14 @@ export const ConnectionRequests = () => {
                 <CardContent>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">{req.message}</p>
                   <div className="flex space-x-2">
-                    <Button 
+                    <Button
                       onClick={() => updateRequestStatus(req.id, 'accepted')}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Accept
                     </Button>
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => updateRequestStatus(req.id, 'rejected')}
                       className="border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
@@ -146,9 +146,9 @@ export const ConnectionRequests = () => {
                       <User className="w-5 h-5 mr-2" />
                       {req.helper_profile?.name || 'Unknown User'}
                     </div>
-                    <Badge 
-                      variant={req.status === 'pending' ? 'outline' : 
-                               req.status === 'accepted' ? 'default' : 'destructive'}
+                    <Badge
+                      variant={req.status === 'pending' ? 'outline' :
+                        req.status === 'accepted' ? 'default' : 'destructive'}
                     >
                       {req.status === 'pending' && <Clock className="w-4 h-4 mr-1" />}
                       {req.status === 'accepted' && <CheckCircle className="w-4 h-4 mr-1" />}
