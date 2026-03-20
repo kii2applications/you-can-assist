@@ -37,17 +37,30 @@ export const usePushNotifications = () => {
     };
 
     const subscribe = useCallback(async () => {
-        if (!registration || !user) return false;
+        if (!registration || !user) {
+            console.log('Push: Missing registration or user', { hasRegistration: !!registration, hasUser: !!user });
+            return false;
+        }
 
         try {
+            console.log('Push: Requesting permission...');
             const permission = await Notification.requestPermission();
+            console.log('Push: Permission result:', permission);
             setPermissionState(permission);
             if (permission !== 'granted') return false;
+
+            console.log('Push: Subscribing with VAPID Key:', VAPID_PUBLIC_KEY ? 'Present' : 'Missing');
+            if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.includes('...')) {
+                console.error('Push: Invalid or missing VAPID Public Key. Please check your environment variables.');
+                toast.error("Notification setup is incomplete (VAPID key missing)");
+                return false;
+            }
 
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
+            console.log('Push: Subscription successful');
 
             const { error } = await supabase
                 .from('push_subscriptions' as any)
