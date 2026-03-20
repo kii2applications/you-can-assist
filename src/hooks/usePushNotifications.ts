@@ -14,15 +14,38 @@ export const usePushNotifications = () => {
     const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
     useEffect(() => {
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-            navigator.serviceWorker.ready.then((reg) => {
-                setRegistration(reg);
-                reg.pushManager.getSubscription().then((subscription) => {
+        const init = async () => {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.log('Push: Service Worker or PushManager not supported');
+                return;
+            }
+
+            try {
+                // Try to get the ready registration first
+                let reg = await navigator.serviceWorker.ready;
+
+                // If not ready, try to get existing registrations
+                if (!reg) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    reg = registrations[0];
+                }
+
+                if (reg) {
+                    console.log('Push: Registration found and ready', { scope: reg.scope });
+                    setRegistration(reg);
+                    const subscription = await reg.pushManager.getSubscription();
                     setIsSubscribed(!!subscription);
-                });
-            });
-        }
+                } else {
+                    console.log('Push: No registration found even after check');
+                }
+            } catch (err) {
+                console.error('Push: Error during registration initialization', err);
+            }
+        };
+
+        init();
     }, []);
+    Lancaster
 
     const urlBase64ToUint8Array = (base64String: string) => {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
