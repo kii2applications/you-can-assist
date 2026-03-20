@@ -29,7 +29,7 @@ export const Header = () => {
         } else {
             const success = await subscribe();
             if (success) toast.success("Notifications enabled!");
-            else if (Notification.permission === 'denied') {
+            else if ('Notification' in window && Notification.permission === 'denied') {
                 toast.error("Notifications are blocked. Please enable them in your browser settings.");
             }
         }

@@ -9,14 +9,14 @@ export const usePushNotifications = () => {
     const { user } = useAuth();
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [permissionState, setPermissionState] = useState<NotificationPermission>(
-        typeof window !== 'undefined' ? Notification.permission : 'default'
+        typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
     );
     const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
     useEffect(() => {
         const init = async () => {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                console.log('Push: Service Worker or PushManager not supported');
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+                console.log('Push: Service Worker, PushManager, or Notification not supported');
                 return;
             }
 
