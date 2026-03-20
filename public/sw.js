@@ -8,7 +8,17 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  // Delete ALL old caches (especially 'kii2connect-v1' which cached broken paths)
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((name) => {
+          console.log('SW: Deleting old cache:', name);
+          return caches.delete(name);
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
 // Push Event Listener
