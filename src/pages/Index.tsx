@@ -16,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { Header } from "@/components/Header";
+
 const Index = () => {
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
@@ -34,73 +36,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen safe-area-inset-top pb-20">
-      {/* Mobile-friendly Header */}
-      <header className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-blue-100 dark:border-gray-700 sticky top-0 z-50 safe-area-inset-top">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <img
-                  src="/lovable-uploads/d6feabf9-2ed6-480e-91b4-827b47d13167.png"
-                  alt="Kii2Connect Logo"
-                  className="w-8 h-8 object-contain"
-                />
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                Kii2Connect
-              </h1>
-            </div>
-
-            {/* Right side - Theme + Menu */}
-            <div className="flex items-center space-x-2">
-              <ThemeToggle />
-
-              {loading ? (
-                <div className="text-gray-600 dark:text-gray-300 text-sm">Loading...</div>
-              ) : user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Menu className="w-5 h-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => navigate("/requests")}>
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Requests
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/profile")}>
-                      <User className="w-4 h-4 mr-2" />
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => signOut()} className="text-red-600 dark:text-red-400">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Menu className="w-5 h-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => navigate("/auth")}>
-                      Sign In
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/auth")}>
-                      Join Community
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="max-w-5xl mx-auto px-4 py-16">

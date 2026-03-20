@@ -34,7 +34,7 @@ export const ConnectionRequestDialog = ({ helper }: ConnectionRequestDialogProps
     if (!user) return;
 
     const skillToRequest = selectedSkill === "custom" ? customSkill : selectedSkill;
-    
+
     if (!skillToRequest.trim()) {
       toast({
         title: "Error",
@@ -57,6 +57,15 @@ export const ConnectionRequestDialog = ({ helper }: ConnectionRequestDialogProps
 
       if (error) throw error;
 
+      // Trigger notification to the helper
+      const { sendNotificationToUser } = await import("@/integrations/notifications/utils");
+      sendNotificationToUser(
+        helper.id,
+        "New Help Request!",
+        `${user.email || 'Someone'} requested help with ${skillToRequest}`,
+        '/requests'
+      );
+
       toast({
         title: "Request Sent!",
         description: `Your request for help with ${skillToRequest} has been sent to ${helper.name}.`
@@ -69,7 +78,7 @@ export const ConnectionRequestDialog = ({ helper }: ConnectionRequestDialogProps
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message.includes("duplicate") 
+        description: error.message.includes("duplicate")
           ? "You've already sent a request for this skill to this person"
           : error.message,
         variant: "destructive"
