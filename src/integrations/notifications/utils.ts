@@ -5,23 +5,26 @@ export const sendNotificationToUser = async (recipientId: string, title: string,
         // In a real implementation with a backend, we might just call a Supabase Edge Function
         // that handles the actual push sending using web-push library and VAPID keys.
 
+        console.log('Push: Fetching subscriptions for recipient:', recipientId);
         const { data: subscriptions, error } = await supabase
             .from('push_subscriptions' as any)
             .select('subscription')
             .eq('user_id', recipientId);
 
         if (error) {
-            console.error('Error fetching subscriptions:', error);
+            console.error('Push: Error fetching subscriptions:', error);
             return;
         }
 
         if (!subscriptions || (subscriptions as any[]).length === 0) {
-            console.log('No push subscriptions found for user:', recipientId);
+            console.log('Push: No push subscriptions found for recipient:', recipientId);
             return;
         }
 
+        console.log(`Push: Found ${subscriptions.length} subscriptions. Triggering Edge Function...`);
+
         // Call our Supabase Edge Function to send the push
-        const { error: edgeFunctionError } = await supabase.functions.invoke('send-push-notification', {
+        const { data, error: edgeFunctionError } = await supabase.functions.invoke('send-push-notification', {
             body: {
                 recipientId,
                 title,
@@ -32,8 +35,9 @@ export const sendNotificationToUser = async (recipientId: string, title: string,
         });
 
         if (edgeFunctionError) {
-            console.warn('Edge function not yet deployed or error occurred:', edgeFunctionError);
-            // Fallback: we could show a real-time toast if we had a channel
+            console.warn('Push: Edge function error:', edgeFunctionError);
+        } else {
+            console.log('Push: Edge function response:', data);
         }
     } catch (error) {
         console.error('Error in sendNotificationToUser:', error);

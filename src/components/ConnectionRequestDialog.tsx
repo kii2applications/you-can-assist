@@ -59,7 +59,7 @@ export const ConnectionRequestDialog = ({ helper }: ConnectionRequestDialogProps
 
       // Trigger notification to the helper
       const { sendNotificationToUser } = await import("@/integrations/notifications/utils");
-      sendNotificationToUser(
+      await sendNotificationToUser(
         helper.id,
         "New Help Request!",
         `${user.email || 'Someone'} requested help with ${skillToRequest}`,
