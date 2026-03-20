@@ -475,12 +475,9 @@ const Search = () => {
         hasMore: count ? start + ITEMS_PER_PAGE < count : false
       }));
 
-      // After basic search is complete and results are shown, 
-      // trigger AI search if enabled
-      if (useAI && searchTerm) {
-        performExtendedSearch(searchTerm, location);
-      }
-
+      // After basic search is complete, performSearch will trigger AI search if enabled
+      // No need to trigger it here to avoid double calls during initial search
+      // or redundant calls during pagination.
     } catch (error) {
       console.error('Error fetching profiles:', error);
       setSearchState(prev => ({ ...prev, loading: false }));

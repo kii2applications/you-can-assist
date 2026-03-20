@@ -9,7 +9,7 @@ if (!GEMINI_API_KEY) {
 }
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 interface SelfHelpSuggestion {
     title: string;
@@ -49,19 +49,35 @@ const extractJSON = (text: string): any => {
     } catch {
         try {
             // If that fails, try to extract JSON from markdown code blocks
-            const jsonMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+            const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
             if (jsonMatch && jsonMatch[1]) {
-                return JSON.parse(jsonMatch[1]);
+                const cleanedJson = jsonMatch[1].trim();
+                return JSON.parse(cleanedJson);
             }
 
-            // If no code blocks, try to find the first { and last }
-            const start = text.indexOf('{');
-            const end = text.lastIndexOf('}');
-            if (start !== -1 && end !== -1) {
+            // If no code blocks, try to find the first { or [ and last } or ]
+            const startBrace = text.indexOf('{');
+            const endBrace = text.lastIndexOf('}');
+            const startBracket = text.indexOf('[');
+            const endBracket = text.lastIndexOf(']');
+
+            // Find the most likely boundaries
+            let start = -1;
+            let end = -1;
+
+            if (startBrace !== -1 && (startBracket === -1 || startBrace < startBracket)) {
+                start = startBrace;
+                end = endBrace;
+            } else if (startBracket !== -1) {
+                start = startBracket;
+                end = endBracket;
+            }
+
+            if (start !== -1 && end !== -1 && end > start) {
                 return JSON.parse(text.slice(start, end + 1));
             }
-        } catch {
-            // If all parsing attempts fail, return null
+        } catch (e) {
+            console.error('Error parsing extracted JSON:', e, 'Raw text:', text);
             return null;
         }
     }
@@ -83,7 +99,7 @@ Instructions:
 6. Ensure all URLs and information are real and accessible
 7. Include people from various platforms (YouTube, LinkedIn, X (Twitter), Instagram, Snapchat, Tiktok, personal websites, etc.)
 
-Return the data in this exact JSON format:
+Return ONLY a JSON object in this exact format (no other text):
 {
     "query": "${searchTerm}",
     "experts": [
@@ -105,21 +121,20 @@ Return the data in this exact JSON format:
     ]
 }`;
 
-        console.log('Sending prompt to Gemini:', prompt);
+        console.log('Sending prompt to Gemini (getExpertRecommendations):', searchTerm);
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        console.log('Raw Gemini response:', response.text());
+        const responseText = response.text();
 
-        const parsedResponse = extractJSON(response.text());
-        console.log('Parsed response:', parsedResponse);
+        const parsedResponse = extractJSON(responseText);
 
         if (!parsedResponse || !parsedResponse.experts || !Array.isArray(parsedResponse.experts)) {
-            console.error('Invalid response structure:', parsedResponse);
+            console.error('Invalid response structure for experts:', responseText);
             return null;
         }
 
         // Validate each expert has required fields
-        const validExperts = parsedResponse.experts.filter(expert =>
+        const validExperts = parsedResponse.experts.filter((expert: any) =>
             expert.name &&
             expert.expertise &&
             expert.platform &&
@@ -133,7 +148,7 @@ Return the data in this exact JSON format:
         }
 
         return {
-            query: parsedResponse.query,
+            query: parsedResponse.query || searchTerm,
             experts: validExperts
         };
     } catch (error) {
@@ -160,12 +175,13 @@ Return ONLY a JSON object in this exact format (no other text):
     ]
 }`;
 
+        console.log('Sending prompt to Gemini (getSelfHelpSuggestions):', query);
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const parsedResponse = extractJSON(response.text());
 
         if (!parsedResponse) {
-            throw new Error('Failed to parse AI response');
+            throw new Error('Failed to parse AI response for self-help');
         }
 
         return parsedResponse;
@@ -190,12 +206,13 @@ Return ONLY a JSON object in this exact format (no other text):
     ]
 }`;
 
+        console.log('Sending prompt to Gemini (getEnhancedSearchTerms):', query);
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const parsedResponse = extractJSON(response.text());
 
         if (!parsedResponse) {
-            throw new Error('Failed to parse AI response');
+            throw new Error('Failed to parse AI response for enhanced search terms');
         }
 
         return parsedResponse;
@@ -207,24 +224,29 @@ Return ONLY a JSON object in this exact format (no other text):
 
 export const getSearchTermExpansion = async (searchTerm: string): Promise<string[]> => {
     try {
-        const prompt = `Given the search term "${searchTerm}", provide a list of closely related terms, skills, and variations that would be relevant in a professional/skills context. Focus on terms that would appear in someone's profile, skills, or job description. Return only an array of terms, no explanations.
+        const prompt = `Given the search term "${searchTerm}", provide a list of closely related terms, skills, and variations that would be relevant in a professional/skills context. Focus on terms that would appear in someone's profile, skills, or job description.
+Return ONLY a JSON array of strings (no other text).
 
-Example input: "cook"
 Example output: ["cook", "chef", "cooking", "culinary", "food preparation", "kitchen", "baking", "food service"]
 
 Input: "${searchTerm}"
 Output:`;
 
+        console.log('Sending prompt to Gemini (getSearchTermExpansion):', searchTerm);
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const responseText = response.text();
-        let terms: string[] = [];
 
-        try {
-            // Try to parse as JSON array first
-            terms = JSON.parse(responseText);
-        } catch {
-            // If not valid JSON, split by commas and clean up
+        let terms: string[] = [];
+        const parsedResponse = extractJSON(responseText);
+
+        if (Array.isArray(parsedResponse)) {
+            terms = parsedResponse;
+        } else if (parsedResponse && typeof parsedResponse === 'object' && parsedResponse.terms) {
+            // Handle case where AI returns {"terms": [...]}
+            terms = parsedResponse.terms;
+        } else {
+            // Fallback for non-JSON or weird JSON
             terms = responseText
                 .replace(/[\[\]"']/g, '')
                 .split(',')
@@ -233,7 +255,7 @@ Output:`;
         }
 
         // Add the original search term if not present
-        if (!terms.includes(searchTerm.toLowerCase())) {
+        if (!terms.some(t => t.toLowerCase() === searchTerm.toLowerCase())) {
             terms.unshift(searchTerm.toLowerCase());
         }
 
