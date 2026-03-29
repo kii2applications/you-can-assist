@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from "@google/genai";
 
 // Initialize Gemini client
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -8,8 +8,7 @@ if (!GEMINI_API_KEY) {
     console.error('VITE_GEMINI_API_KEY is not set in environment variables');
 }
 
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 interface SelfHelpSuggestion {
     title: string;
@@ -92,11 +91,11 @@ export const getExpertRecommendations = async (searchTerm: string, location?: st
 
 Instructions:
 1. Find at least 10 people who are experts in ${searchTerm}${locationContext}
-2. Include only verifiable experts with actual online presence
+2. Include only verifiable experts with actual online presence based on current search results
 3. Include people with different specialties and approaches to ${searchTerm}
 4. For each expert, find their most relevant and helpful content
-5. Try to include their profile picture URL if publicly available
-6. Ensure all URLs and information are real and accessible
+5. Try to include their profile picture URL if publicly available from the search data
+6. Ensure all URLs and information are real and accessible (verify against search results)
 7. Include people from various platforms (YouTube, LinkedIn, X (Twitter), Instagram, Snapchat, Tiktok, personal websites, etc.)
 
 Return ONLY a JSON object in this exact format (no other text):
@@ -122,9 +121,14 @@ Return ONLY a JSON object in this exact format (no other text):
 }`;
 
         console.log('Sending prompt to Gemini (getExpertRecommendations):', searchTerm);
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const responseText = response.text();
+        const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+                tools: [{ googleSearch: {} }]
+            }
+        });
+        const responseText = response.text || '';
 
         const parsedResponse = extractJSON(responseText);
 
@@ -176,9 +180,11 @@ Return ONLY a JSON object in this exact format (no other text):
 }`;
 
         console.log('Sending prompt to Gemini (getSelfHelpSuggestions):', query);
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const parsedResponse = extractJSON(response.text());
+        const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        });
+        const parsedResponse = extractJSON(response.text || '');
 
         if (!parsedResponse) {
             throw new Error('Failed to parse AI response for self-help');
@@ -207,9 +213,11 @@ Return ONLY a JSON object in this exact format (no other text):
 }`;
 
         console.log('Sending prompt to Gemini (getEnhancedSearchTerms):', query);
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const parsedResponse = extractJSON(response.text());
+        const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        });
+        const parsedResponse = extractJSON(response.text || '');
 
         if (!parsedResponse) {
             throw new Error('Failed to parse AI response for enhanced search terms');
@@ -233,9 +241,11 @@ Input: "${searchTerm}"
 Output:`;
 
         console.log('Sending prompt to Gemini (getSearchTermExpansion):', searchTerm);
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const responseText = response.text();
+        const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        });
+        const responseText = response.text || '';
 
         let terms: string[] = [];
         const parsedResponse = extractJSON(responseText);
